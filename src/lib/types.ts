@@ -139,6 +139,166 @@ export interface Sample {
   notes: string;
 }
 
+export interface Quotation {
+  id: string;
+  qtnDt: string;
+  delDt: string;
+  option: string;
+  quotationNo: string;
+  amend: string;
+  ourRef: string;
+  buyer: string;
+  buyerRef: string;
+  gi: string;
+  mp: string;
+  smv: string;
+  pph: string;
+  eff: string;
+  qty: string;
+  gCm: string;
+  aCm: string;
+  nFob: string;
+  fFob: string;
+  oMer: string;
+  appStatus: string;
+}
+
+export interface ConfirmOrder {
+  id: string;
+  lot: string;
+  po: string;
+  lcContact: string;
+  bs: string;
+  size: string;
+  qty: string;
+  rate: string;
+  value: string;
+  poDate: string;
+  orgDelDt: string;
+  agreedDt: string;
+  exFactDt: string;
+  cuttableQty: string;
+  delMode: string;
+  delPort: string;
+}
+
+export interface OrderStatus {
+  id: string;
+  chDt: string;
+  v: string;
+  mer: string;
+  buyer: string;
+  ordDt: string;
+  ref: string;
+  buyerRef: string;
+  ordQty: string;
+  poNo: string;
+  poQty: string;
+  a: string;
+  pct: string;
+  cuttable: string;
+  fab: string;
+  colorQty: string;
+  lt: string;
+  lotQty: string;
+  delD: string;
+  status: string;
+}
+
+export interface AccRmBooking {
+  id: string;
+  buyer: string;
+  c: string;
+  s: string;
+  ref: string;
+  lot: string;
+  delDt: string;
+  pcd: string;
+  lotQty: string;
+  eiPid: string;
+  bomItem: string;
+  details: string;
+  bi: string;
+  conDz: string;
+  w: string;
+  ttlCon: string;
+  rate: string;
+  value: string;
+  nob: string;
+  bQty: string;
+  bValue: string;
+  blnQty: string;
+  blnVal: string;
+  status: string;
+  bg: string;
+}
+
+export interface FabricBooking {
+  id: string;
+  color: string;
+  consump: number;
+  unit: string;
+  w: number;
+  req: number;
+  booked: number;
+  bal: number;
+  mill: string;
+  labDip: string;
+  pi: string;
+  etd: string;
+  eta: string;
+  rate: number;
+  amt: number;
+}
+
+export interface AccessoriesBooking {
+  id: string;
+  orderNo: string;
+  item: string;
+  color: string;
+  size: string;
+  reqQty: number;
+  allowance: number;
+  bookQty: number;
+  supplier: string;
+  targetDate: string;
+  status: "Pending" | "Booked" | "In-House";
+}
+
+export interface PiRegister {
+  id: string;
+  piNo: string;
+  date: string;
+  ref: string;
+  buyer: string;
+  supplier: string;
+  type: string;
+  qty: number;
+  val: number;
+  pt: string;
+  lcNo: string;
+  lcDate: string;
+  st: string;
+  status: string;
+}
+
+export interface AccEstimation {
+  id: string;
+  name: string;
+  status: string;
+  place: string;
+  desc: string;
+  qty: number;
+  unit: string;
+  wastage: number;
+  rel: number;
+  rate: number;
+  amt: number;
+  nominee: string;
+  supplier: string;
+}
+
+
 export interface Costing {
   id: string;
   orderId: string;
@@ -448,6 +608,15 @@ export interface ErpData {
   employees: Employee[];
   attendance: AttendanceLog[];
   payroll: PayrollRecord[];
+  
+  quotations: Quotation[];
+  confirmOrders: ConfirmOrder[];
+  orderStatuses: OrderStatus[];
+  accRmBookings: AccRmBooking[];
+  fabricBookings: FabricBooking[];
+  accessoriesBookings: AccessoriesBooking[];
+  piRegisters: PiRegister[];
+  accEstimations: AccEstimation[];
 }
 
 /** Key of every array-valued module in ErpData — used by generic CRUD helpers. */

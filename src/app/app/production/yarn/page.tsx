@@ -23,6 +23,7 @@ import {
 } from "@/components/commercial/ui";
 import { formatNumber, formatDate } from "@/lib/commercialFormat";
 import { bn } from "@/lib/bn";
+import { toast } from "@/components/ui/Toast";
 
 const mockYarnStock = [
   { id: "YRN-101", count: "30s", composition: "100% Cotton", brand: "Square", lot: "L-2026-A1", qty: 5000, status: "Available" },
@@ -96,7 +97,7 @@ export default function YarnStorePage() {
                       <Badge tone={y.status === "Available" ? "green" : "amber"}>{y.status}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Button variant="outline" size="sm">Issue to Floor</Button>
+                      <Button variant="outline" size="sm" onClick={() => toast.success("Yarn issued to floor")}>Issue to Floor</Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -171,7 +172,7 @@ export default function YarnStorePage() {
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="secondary" onClick={() => setAddOpen(false)}>{bn.cancel}</Button>
-            <Button type="button" onClick={() => setAddOpen(false)}>{bn.save}</Button>
+            <Button type="button" onClick={() => { toast.success("Yarn received successfully"); setAddOpen(false); }}>{bn.save}</Button>
           </div>
         </form>
       </Modal>

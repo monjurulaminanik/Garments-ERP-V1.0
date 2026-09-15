@@ -18,9 +18,10 @@ import {
   Label,
   Button,
   Tabs,
-  Modal
 } from "@/components/commercial/ui";
+import { Modal } from "@/components/commercial/ui";
 import { bn } from "@/lib/bn";
+import { toast } from "@/components/ui/Toast";
 
 const mockBatches = [
   { id: "B-2026-001", order: "PO-24-001", color: "Navy Blue", weight: 500, recipe: "R-101", status: "Prepared" },
@@ -160,7 +161,7 @@ export default function DyeingPage() {
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="secondary" onClick={() => setAddBatchOpen(false)}>{bn.cancel}</Button>
-            <Button type="button" onClick={() => setAddBatchOpen(false)}>{bn.save}</Button>
+            <Button type="button" onClick={() => { toast.success("Dyeing batch created successfully"); setAddBatchOpen(false); }}>{bn.save}</Button>
           </div>
         </form>
       </Modal>

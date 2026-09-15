@@ -49,6 +49,7 @@ import { orders as seedOrders } from "@/lib/seed-data";
 import { exportToExcel, exportToPDF } from "@/lib/commercialExport";
 import { formatDate, formatNumber } from "@/lib/commercialFormat";
 import { bn } from "@/lib/bn";
+import { toast } from "@/components/ui/Toast";
 
 const PROCUREMENT_STATUSES: ProcurementStatus[] = ["booked", "ordered", "partial received", "in house", "delayed"];
 
@@ -545,9 +546,14 @@ function CommercialImportTab() {
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader>
-          <CardTitle>Commercial Import Tracking</CardTitle>
-          <p className="text-xs text-slate-500">PI Handover, Custom Clearance, LC Open, and UD.</p>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Commercial Import Tracking</CardTitle>
+            <p className="text-xs text-slate-500">PI Handover, Custom Clearance, LC Open, and UD.</p>
+          </div>
+          <Button size="sm" onClick={() => toast.success("New Booking form opened")}>
+            <Plus className="h-4 w-4 mr-1" /> New Booking
+          </Button>
         </CardHeader>
         <CardContent>
           <Table>
@@ -571,7 +577,7 @@ function CommercialImportTab() {
                 </TableCell>
                 <TableCell><Badge tone="green">Cleared</Badge></TableCell>
                 <TableCell><Badge tone="green">Done</Badge></TableCell>
-                <TableCell><Button variant="outline" size="sm">Update</Button></TableCell>
+                <TableCell><Button variant="outline" size="sm" onClick={() => toast.success("Update PI-2026-001")}>Update</Button></TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>PI-2026-002</TableCell>
@@ -582,7 +588,7 @@ function CommercialImportTab() {
                 </TableCell>
                 <TableCell><Badge tone="amber">Pending</Badge></TableCell>
                 <TableCell><Badge tone="amber">Pending</Badge></TableCell>
-                <TableCell><Button variant="outline" size="sm">Update</Button></TableCell>
+                <TableCell><Button variant="outline" size="sm" onClick={() => toast.success("Update PI-2026-002")}>Update</Button></TableCell>
               </TableRow>
             </TableBody>
           </Table>

@@ -49,6 +49,7 @@ export function AppTopbar({ onMenuClick }: AppTopbarProps) {
       <div className="flex items-center gap-2">
         <button
           type="button"
+          onClick={() => alert("No new notifications at this time.")}
           className="relative flex h-8 w-8 items-center justify-center rounded-md text-[#6E8386] hover:bg-[#F3F6F7]"
           aria-label="Notifications"
         >

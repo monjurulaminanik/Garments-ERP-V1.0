@@ -22,6 +22,7 @@ import {
 } from "@/components/commercial/ui";
 import { formatNumber } from "@/lib/commercialFormat";
 import { bn } from "@/lib/bn";
+import { toast } from "@/components/ui/Toast";
 
 const mockPrograms = [
   { id: "KP-1024", order: "PO-24-001", style: "ST-8899", fabric: "Single Jersey 160 GSM", machine: "M-01", target: 1200, output: 850, status: "Running" },
@@ -165,7 +166,7 @@ export default function KnittingPage() {
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="secondary" onClick={() => setAddProgramOpen(false)}>{bn.cancel}</Button>
-            <Button type="button" onClick={() => setAddProgramOpen(false)}>{bn.save}</Button>
+            <Button type="button" onClick={() => { toast.success("Knitting program saved successfully"); setAddProgramOpen(false); }}>{bn.save}</Button>
           </div>
         </form>
       </Modal>
@@ -194,7 +195,7 @@ export default function KnittingPage() {
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="secondary" onClick={() => setAddRollOpen(false)}>{bn.cancel}</Button>
-            <Button type="button" onClick={() => setAddRollOpen(false)}>{bn.save}</Button>
+            <Button type="button" onClick={() => { toast.success("Grey roll generated successfully"); setAddRollOpen(false); }}>{bn.save}</Button>
           </div>
         </form>
       </Modal>

@@ -1022,6 +1022,14 @@ export function buildSeedData(): ErpData {
     employees: hrData.employees,
     attendance: hrData.attendance,
     payroll: hrData.payroll,
+    quotations: [],
+    confirmOrders: [],
+    orderStatuses: [],
+    accRmBookings: [],
+    fabricBookings: [],
+    accessoriesBookings: [],
+    piRegisters: [],
+    accEstimations: [],
   };
 }
 

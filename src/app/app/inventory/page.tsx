@@ -44,6 +44,7 @@ import { orders as seedOrders } from "@/lib/seed-data";
 import { exportToExcel, exportToPDF } from "@/lib/commercialExport";
 import { formatDate, formatNumber } from "@/lib/commercialFormat";
 import { bn } from "@/lib/bn";
+import { toast } from "@/components/ui/Toast";
 
 const LOW_STOCK_THRESHOLD = 3000;
 
@@ -386,7 +387,7 @@ function InventoryContent() {
                   <Input type="text" readOnly value="2.85" className="bg-slate-50" />
                 </div>
                 <div>
-                  <Button className="w-full">Update BOM</Button>
+                  <Button className="w-full" onClick={() => toast.success("BOM Updated")}>Update BOM</Button>
                 </div>
               </div>
             </CardContent>
@@ -395,7 +396,7 @@ function InventoryContent() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Cutting Issue & Bundling</CardTitle>
-              <Button size="sm">
+              <Button size="sm" onClick={() => toast.success("Fabric Issued")}>
                 <Scissors className="h-4 w-4 mr-2" />
                 {"Issue Fabric"}
               </Button>

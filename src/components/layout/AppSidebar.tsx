@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
@@ -34,6 +35,7 @@ import {
   HandCoins,
   TrendingUp,
   Fingerprint,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useErpStore } from "@/lib/store";
@@ -47,8 +49,9 @@ import {
 interface NavLeaf {
   label: string;
   href: string;
-  icon: LucideIcon;
+  icon?: LucideIcon;
   module: ModuleKey;
+  children?: Omit<NavLeaf, 'icon' | 'children'>[];
 }
 
 interface NavSection {
@@ -61,7 +64,58 @@ const topLevel: NavLeaf[] = [
   { label: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard, module: "dashboard" },
 ];
 
+const newMerchandisingSection: NavSection = {
+  title: "Merchandising (New)",
+  titleBn: "মার্চেন্ডাইজিং (নতুন)",
+  items: [
+    {
+      label: "QUOTATION",
+      href: "#",
+      icon: Calculator,
+      module: "merchandising",
+      children: [
+        { label: "Quotation/Costing Register", href: "/app/merchandising/quotation", module: "merchandising" }
+      ]
+    },
+    {
+      label: "MERCHANDISING",
+      href: "#",
+      icon: Layers,
+      module: "merchandising",
+      children: [
+        { label: "Confirm Order Details", href: "/app/merchandising/confirm-order", module: "merchandising" },
+        { label: "Order Status Register", href: "/app/merchandising/order-status", module: "merchandising" },
+        { label: "Acc RM Booking Analysis Tools", href: "/app/merchandising/analysis", module: "merchandising" },
+        { label: "Accessories Estimation", href: "/app/merchandising/accessories-estimation", module: "merchandising" },
+        { label: "Accessories Booking (Direct)", href: "/app/merchandising/accessories-booking", module: "merchandising" },
+        { label: "PI Register All", href: "/app/merchandising/pi-register", module: "merchandising" },
+        { label: "Fabric Booking Register", href: "/app/merchandising/fabric-booking", module: "merchandising" }
+      ]
+    },
+    {
+      label: "SAMPLE",
+      href: "#",
+      icon: Shirt,
+      module: "merchandising",
+      children: [
+        { label: "Sample Request Register", href: "/app/merchandising/sample-request", module: "merchandising" },
+        { label: "Buyer Style Setup", href: "/app/merchandising/buyer-style", module: "merchandising" }
+      ]
+    },
+    {
+      label: "RATIO ANALYSIS",
+      href: "#",
+      icon: FileBarChart,
+      module: "merchandising",
+      children: [
+        { label: "PO Agreed Del Confirmation", href: "/app/merchandising/po-agreed", module: "merchandising" }
+      ]
+    }
+  ]
+};
+
 const navSections: NavSection[] = [
+  newMerchandisingSection,
   {
     title: "Commercial",
     titleBn: "কমার্শিয়াল",
@@ -118,6 +172,7 @@ const navSections: NavSection[] = [
     title: "Garments Production",
     titleBn: "গার্মেন্টস উৎপাদন",
     items: [
+      { label: "Production Monitoring (New)", href: "/app/production/monitoring", icon: FileBarChart, module: "production" },
       { label: "Cutting", href: "/app/production/cutting", icon: Scissors, module: "production" },
       { label: "Sewing Lines", href: "/app/production/sewing", icon: Shirt, module: "production" },
       { label: "Finishing", href: "/app/production/finishing", icon: Factory, module: "production" },
@@ -128,6 +183,7 @@ const navSections: NavSection[] = [
     title: "Quality",
     titleBn: "কোয়ালিটি",
     items: [
+      { label: "Final Insp / QC (New)", href: "/app/qc/final-inspection", icon: FileCheck2, module: "quality-control" },
       { label: "Inline QC", href: "/app/quality-control?tab=inline", icon: ScanSearch, module: "quality-control" },
       { label: "Endline QC", href: "/app/quality-control?tab=endline", icon: ClipboardCheck, module: "quality-control" },
       { label: "Final Inspection", href: "/app/quality-control?tab=final", icon: FileCheck2, module: "quality-control" },
@@ -138,6 +194,7 @@ const navSections: NavSection[] = [
     title: "Shipment",
     titleBn: "শিপমেন্ট",
     items: [
+      { label: "Shipment & Docs (New)", href: "/app/shipment/documentation", icon: FileStack, module: "shipment" },
       { label: "Shipment Plan", href: "/app/shipment?tab=plan", icon: MapIcon, module: "shipment" },
       { label: "Packing List", href: "/app/shipment?tab=packing", icon: FileStack, module: "shipment" },
       { label: "Cartons", href: "/app/shipment?tab=carton", icon: Container, module: "shipment" },
@@ -189,7 +246,15 @@ function isActive(pathname: string, search: string, href: string): boolean {
 }
 
 function filterByRole(items: NavLeaf[], roleId: RoleId | null): NavLeaf[] {
-  return items.filter((item) => roleCanAccessModule(roleId, item.module));
+  return items.map(item => {
+    if (!roleCanAccessModule(roleId, item.module)) return null;
+    if (item.children) {
+      const filteredChildren = item.children.filter(child => roleCanAccessModule(roleId, child.module));
+      if (filteredChildren.length === 0 && item.href === "#") return null;
+      return { ...item, children: filteredChildren };
+    }
+    return item;
+  }).filter(Boolean) as NavLeaf[];
 }
 
 export interface AppSidebarProps {
@@ -251,7 +316,8 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
             <NavItem
               key={item.href}
               item={item}
-              active={isActive(pathname, search, item.href)}
+              pathname={pathname}
+              search={search}
               onNavigate={onNavigate}
             />
           ))}
@@ -268,7 +334,8 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
                 <NavItem
                   key={item.href}
                   item={item}
-                  active={isActive(pathname, search, item.href)}
+                  pathname={pathname}
+                  search={search}
                   onNavigate={onNavigate}
                 />
               ))}
@@ -286,7 +353,8 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
                   icon: SettingsIcon,
                   module: "settings",
                 }}
-                active={isActive(pathname, search, "/app/settings")}
+                pathname={pathname}
+                search={search}
                 onNavigate={onNavigate}
               />
             </ul>
@@ -315,29 +383,66 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
 
 function NavItem({
   item,
-  active,
+  pathname,
+  search,
   onNavigate,
+  depth = 0,
 }: {
   item: NavLeaf;
-  active: boolean;
+  pathname: string;
+  search: string;
   onNavigate?: () => void;
+  depth?: number;
 }) {
+  const [isOpen, setIsOpen] = useState(true);
+  const active = item.href !== "#" && isActive(pathname, search, item.href);
+  const hasChildren = item.children && item.children.length > 0;
   const Icon = item.icon;
+
+  const content = (
+    <div
+      className={cn(
+        "flex items-center gap-2 rounded-md px-2.5 py-[7px] text-[12.5px] font-medium transition-colors w-full cursor-pointer",
+        active
+          ? "bg-[#E36414] text-white shadow-sm"
+          : "text-white/70 hover:bg-white/[0.08] hover:text-white"
+      )}
+      style={{ paddingLeft: `${10 + depth * 12}px` }}
+      onClick={() => {
+        if (hasChildren) setIsOpen(!isOpen);
+      }}
+    >
+      {hasChildren && (
+        <ChevronRight className={cn("h-3.5 w-3.5 shrink-0 transition-transform", isOpen && "rotate-90")} />
+      )}
+      {!hasChildren && Icon && <Icon className="h-3.5 w-3.5 shrink-0 opacity-90" strokeWidth={2} />}
+      <span className="truncate">{item.label}</span>
+    </div>
+  );
+
   return (
-    <li>
-      <Link
-        href={item.href}
-        onClick={onNavigate}
-        className={cn(
-          "flex items-center gap-2 rounded-md px-2.5 py-[7px] text-[12.5px] font-medium transition-colors",
-          active
-            ? "bg-[#E36414] text-white shadow-sm"
-            : "text-white/70 hover:bg-white/[0.08] hover:text-white"
-        )}
-      >
-        <Icon className="h-3.5 w-3.5 shrink-0 opacity-90" strokeWidth={2} />
-        <span className="truncate">{item.label}</span>
-      </Link>
+    <li className="flex flex-col">
+      {item.href !== "#" ? (
+        <Link href={item.href} onClick={() => { if (!hasChildren) onNavigate?.(); }}>
+          {content}
+        </Link>
+      ) : (
+        content
+      )}
+      {hasChildren && isOpen && (
+        <ul className="mt-0.5 space-y-0.5">
+          {item.children!.map((child) => (
+            <NavItem
+              key={child.href}
+              item={child}
+              pathname={pathname}
+              search={search}
+              onNavigate={onNavigate}
+              depth={depth + 1}
+            />
+          ))}
+        </ul>
+      )}
     </li>
   );
 }
