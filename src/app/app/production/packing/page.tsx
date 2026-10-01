@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/commercial/ui";
 import { PackingJob, useProductionData } from "@/hooks/useProductionData";
-import { orders as seedOrders } from "@/lib/seed-data";
+import { useErpRecords } from "@/hooks/useErpRecords";
 import { exportToExcel, exportToPDF } from "@/lib/commercialExport";
 import { formatDate, formatNumber } from "@/lib/commercialFormat";
 import { bn } from "@/lib/bn";
@@ -44,6 +44,7 @@ const emptyForm: FormState = {
 
 export default function PackingPage() {
   const { packingJobs, addPackingJob, updatePackingJob } = useProductionData();
+  const orders = useErpRecords((state) => state.data.orders);
 
   const [search, setSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
@@ -81,7 +82,7 @@ export default function PackingPage() {
 
   function handleAddSubmit(e: FormEvent) {
     e.preventDefault();
-    const order = seedOrders.find((o) => o.id === form.orderId);
+    const order = orders.find((o) => o.id === form.orderId);
     if (!order) return;
     const packed = Number(form.packed) || 0;
     addPackingJob({
@@ -174,7 +175,7 @@ export default function PackingPage() {
             }}
           >
             <Plus className="h-4 w-4" />
-            নতুন প্যাকিং জব
+            New packing job
           </Button>
         </div>
       </div>
@@ -249,14 +250,14 @@ export default function PackingPage() {
       </Card>
 
       {/* Add packing job modal */}
-      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="নতুন প্যাকিং জব" size="lg">
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="New packing job" size="lg">
         <form onSubmit={handleAddSubmit} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <Label required>{bn.procurement.selectOrder}</Label>
               <Select required value={form.orderId} onChange={(e) => setForm({ ...form, orderId: e.target.value })}>
                 <option value="">— {bn.procurement.selectOrder} —</option>
-                {seedOrders.map((o) => (
+                {orders.map((o) => (
                   <option key={o.id} value={o.id}>
                     {o.buyerName} — {o.poNumber} ({o.style})
                   </option>

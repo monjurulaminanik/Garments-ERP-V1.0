@@ -48,7 +48,7 @@ export default function EnterPage() {
             className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium text-teal-100/70 transition hover:bg-white/5 hover:text-white"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Back to overview
+            Back
           </Link>
           <div className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[#E36414] text-[11px] font-bold shadow-[0_8px_24px_-8px_rgba(227,100,20,0.8)]">
@@ -66,10 +66,10 @@ export default function EnterPage() {
             Role-based panel access
           </p>
           <h1 className="mt-2 font-sans text-2xl font-bold tracking-tight text-white sm:text-3xl">
-            আপনার প্যানেল নির্বাচন করুন
+            Choose your panel
           </h1>
           <p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-teal-100/65">
-            প্রতিটি রোলে শুধু সেই ডিপার্টমেন্টের মডিউল ও ড্যাশবোর্ড দেখাবে — click করলেই সেই প্যানেলে কাজ শুরু হবে।
+            Each role shows only that department's modules and dashboard. Click a role to open its panel.
           </p>
         </div>
 
@@ -108,9 +108,9 @@ export default function EnterPage() {
                 </span>
 
                 <h3 className="mt-3 text-[14px] font-semibold text-white">{role.title}</h3>
-                <p className="text-[11px] font-medium text-teal-200/70">{role.titleBn}</p>
+                <p className="text-[11px] font-medium text-teal-200/70">{role.title}</p>
                 <p className="mt-2 line-clamp-2 text-[12px] leading-snug text-teal-100/55">
-                  {role.descriptionBn}
+                  {role.description}
                 </p>
 
                 <div className="mt-3 flex flex-wrap gap-1">
@@ -144,7 +144,7 @@ export default function EnterPage() {
             <p className="text-[10px] uppercase tracking-[0.16em] text-teal-200/45">Selected panel</p>
             <p className="truncate text-sm font-semibold text-white">
               {active.title}{" "}
-              <span className="font-normal text-teal-200/55">· {active.titleBn}</span>
+              <span className="font-normal text-teal-200/55">· {active.title}</span>
             </p>
             <p className="mt-0.5 truncate text-[11px] text-teal-200/45">
               Modules: {active.modules === "*" ? "All ERP modules" : active.scope.join(" · ")}

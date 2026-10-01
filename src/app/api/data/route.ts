@@ -1,77 +1,128 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
-import { ErpDataModel } from "@/lib/models/ErpData";
-import { seedData } from "@/lib/seed-data";
 import type { ErpData } from "@/lib/types";
+import { RelationError } from "@/lib/db/repair";
+import {
+  ensureReady,
+  loadCommercialView,
+  loadErp,
+  saveCommercial,
+  saveErp,
+  saveSlice,
+  touchUpdatedAt,
+} from "@/lib/db/repository";
 
 export const dynamic = "force-dynamic";
 
-const DOC_KEY = "main";
+function fail(error: unknown) {
+  if (error instanceof RelationError) {
+    return NextResponse.json({ success: false, error: error.message, issues: error.issues }, { status: 400 });
+  }
+  const message = error instanceof Error ? error.message : "Failed to process ERP data.";
+  console.error("[/api/data]", error);
+  return NextResponse.json({ success: false, error: message }, { status: 500 });
+}
 
-/**
- * GET /api/data
- * Returns the full ERP dataset. If no document exists yet in MongoDB
- * (first run on a fresh database), it is auto-seeded from
- * `src/lib/seed-data.ts` and then returned.
- */
 export async function GET(request: NextRequest) {
   try {
-    await connectToDatabase();
-    
-    const storeKey = request.nextUrl.searchParams.get("store") || DOC_KEY;
+    await ensureReady();
+    const store = request.nextUrl.searchParams.get("store") || "main";
+    const updatedAt = new Date().toISOString();
 
-    let doc = await ErpDataModel.findOne({ key: storeKey }).lean();
-
-    if (!doc && storeKey === "main") {
-      const created = await ErpDataModel.create({ key: storeKey, data: seedData });
-      doc = created.toObject();
-    } else if (!doc) {
-      // For specialized stores that don't exist yet, return empty object
-      return NextResponse.json({ success: true, data: null });
+    if (store === "commercial") {
+      return NextResponse.json({ success: true, data: await loadCommercialView(), updatedAt });
     }
 
-    return NextResponse.json({ success: true, data: doc.data as ErpData, updatedAt: doc.updatedAt });
+    const data = await loadErp();
+    if (store === "procurement") return NextResponse.json({ success: true, data: { procurements: data.procurements }, updatedAt });
+    if (store === "inventory") return NextResponse.json({ success: true, data: { inventory: data.inventory, stockLedger: data.stockLedger }, updatedAt });
+    if (store === "production") {
+      return NextResponse.json({
+        success: true,
+        data: {
+          cuttingJobs: data.cuttingJobs,
+          sewingLines: data.sewingLines,
+          finishingJobs: data.finishingJobs,
+          packingJobs: data.packingJobs,
+        },
+        updatedAt,
+      });
+    }
+    if (store === "hr") {
+      return NextResponse.json({
+        success: true,
+        data: { employees: data.employees, attendance: data.attendance, payroll: data.payroll },
+        updatedAt,
+      });
+    }
+    if (store === "merchandising") {
+      return NextResponse.json({
+        success: true,
+        data: {
+          quotations: data.quotations,
+          confirmOrders: data.confirmOrders,
+          orderStatuses: data.orderStatuses,
+          accRmBookings: data.accRmBookings,
+          fabricBookings: data.fabricBookings,
+          accessoriesBookings: data.accessoriesBookings,
+          piRegisters: data.piRegisters,
+          accEstimations: data.accEstimations,
+        },
+        updatedAt,
+      });
+    }
+
+    return NextResponse.json({ success: true, data, updatedAt });
   } catch (error) {
-    console.error(`[GET /api/data] failed:`, error);
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Failed to load ERP data." },
-      { status: 500 }
-    );
+    return fail(error);
   }
 }
 
-/**
- * PUT /api/data
- * Replaces the full ERP dataset with the JSON body `{ data: ErpData }`.
- * Used by the client after any create/update/delete mutation to persist
- * the whole document back to MongoDB (upsert semantics — creates the
- * document if it doesn't exist yet).
- */
 export async function PUT(request: NextRequest) {
   try {
-    const storeKey = request.nextUrl.searchParams.get("store") || DOC_KEY;
+    await ensureReady();
+    const store = request.nextUrl.searchParams.get("store") || "main";
     const body = await request.json();
     const nextData = body?.data;
-
     if (!nextData || typeof nextData !== "object") {
       return NextResponse.json({ success: false, error: "Request body must include a `data` object." }, { status: 400 });
     }
 
-    await connectToDatabase();
+    if (store === "commercial") {
+      const data = await saveCommercial(nextData);
+      return NextResponse.json({ success: true, data, updatedAt: await touchUpdatedAt() });
+    }
 
-    const updated = await ErpDataModel.findOneAndUpdate(
-      { key: storeKey },
-      { key: storeKey, data: nextData },
-      { upsert: true, new: true }
-    ).lean();
+    if (store === "main") {
+      const data = await saveErp(nextData as ErpData);
+      return NextResponse.json({ success: true, data, updatedAt: await touchUpdatedAt() });
+    }
 
-    return NextResponse.json({ success: true, data: updated?.data as ErpData, updatedAt: updated?.updatedAt });
+    const data = await saveSlice(nextData as Partial<ErpData>);
+    const updatedAt = await touchUpdatedAt();
+    if (store === "procurement") return NextResponse.json({ success: true, data: { procurements: data.procurements }, updatedAt });
+    if (store === "inventory") return NextResponse.json({ success: true, data: { inventory: data.inventory, stockLedger: data.stockLedger }, updatedAt });
+    if (store === "production") {
+      return NextResponse.json({
+        success: true,
+        data: {
+          cuttingJobs: data.cuttingJobs,
+          sewingLines: data.sewingLines,
+          finishingJobs: data.finishingJobs,
+          packingJobs: data.packingJobs,
+        },
+        updatedAt,
+      });
+    }
+    if (store === "hr") {
+      return NextResponse.json({
+        success: true,
+        data: { employees: data.employees, attendance: data.attendance, payroll: data.payroll },
+        updatedAt,
+      });
+    }
+    return NextResponse.json({ success: true, data: nextData, updatedAt });
   } catch (error) {
-    console.error("[PUT /api/data] failed:", error);
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Failed to save ERP data." },
-      { status: 500 }
-    );
+    return fail(error);
   }
 }

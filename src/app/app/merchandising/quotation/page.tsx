@@ -1,7 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useMerchandisingData } from "@/hooks/useMerchandisingData";
+import { useErpRecords } from "@/hooks/useErpRecords";
 import QuotationEntryDialog from "./QuotationEntryDialog";
+import { toast } from "@/components/ui/Toast";
 
 const Th = ({ children, className }: any) => (
   <th className={`border border-slate-300 bg-slate-200/50 px-1 py-1 text-center text-[10px] font-semibold text-slate-700 whitespace-nowrap ${className || ""}`}>
@@ -15,55 +18,57 @@ const Td = ({ children, className }: any) => (
   </td>
 );
 
-const FilterInput = () => (
-  <input type="text" className="w-full h-4 text-[9px] border border-slate-300 px-0.5 focus:outline-none" />
-);
-
-const initialRows = [
-  { id: "1", qtnDt: "11/11/26", delDt: "12/12/26", qtnNo: "Q-100", amend: "0", ourRef: "REF-1", buyer: "ZARA", buyerRef: "ZR-01", gi: "PANT", mp: "100", smv: "15", pph: "120", eff: "60", qty: "5000", gCm: "1.2", aCm: "1.1", nFob: "5.5", fFob: "6.0", oMer: "ALAVI" },
-  { id: "2", qtnDt: "12/11/26", delDt: "15/12/26", qtnNo: "Q-101", amend: "1", ourRef: "REF-2", buyer: "H&M", buyerRef: "HM-02", gi: "SHIRT", mp: "80", smv: "12", pph: "150", eff: "65", qty: "10000", gCm: "0.8", aCm: "0.7", nFob: "4.2", fFob: "4.5", oMer: "KHALID" },
-];
+const filterFields = ["qtnDt", "delDt", "option", "", "qtnNo", "", "amend", "", "ourRef", "", "buyer", "buyerRef", "gi", "mp", "smv", "pph", "eff", "qty", "gCm", "aCm", "nFob", "fFob", "oMer", "", "", "", "appStatus"] as const;
 
 export default function QuotationRegister() {
-  const { refresh } = useMerchandisingData();
+  const router = useRouter();
+  const { quotations, refresh, saveQuotation, deleteQuotation } = useMerchandisingData();
+  const buyers = useErpRecords((state) => state.data.buyers);
   const [isQuotationDialogOpen, setIsQuotationDialogOpen] = useState(false);
-  const [localRows, setLocalRows] = useState(initialRows);
+  const [editing, setEditing] = useState<any>(null);
   const [selectedRow, setSelectedRow] = useState<any>(null);
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const rows = quotations.map((row) => ({ ...row, qtnNo: row.quotationNo || "" }));
+  const displayRows = rows.filter((row) =>
+    filterFields.every((field) => {
+      const query = field ? (filters[field] || "").trim().toLowerCase() : "";
+      if (!query) return true;
+      return String((row as any)[field] || "").toLowerCase().includes(query);
+    })
+  );
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
-  const handleAddDummy = () => {
-    setLocalRows([...localRows, {
-      id: Date.now().toString(),
-      qtnDt: "15/11/26", delDt: "20/12/26", qtnNo: "Q-NEW-DUMMY", amend: "0", ourRef: "NEW-REF", buyer: "MANGO", buyerRef: "MN-12", gi: "JACKET", mp: "150", smv: "25", pph: "80", eff: "55", qty: "2000", gCm: "2.5", aCm: "2.3", nFob: "12.0", fFob: "13.5", oMer: "ALAVI"
-    }]);
+  const openNew = () => {
+    setEditing(null);
+    setIsQuotationDialogOpen(true);
   };
 
-  const handleSaveQuotation = (data: any) => {
-    setLocalRows([...localRows, {
-      id: Date.now().toString(),
-      qtnDt: new Date().toLocaleDateString('en-GB'),
-      delDt: "TBD",
-      qtnNo: data.qtnNo || `Q-2026-${localRows.length + 100}`,
-      amend: "0",
-      ourRef: "-",
-      buyer: "HM",
-      buyerRef: "-",
-      gi: "TSHIRT",
-      mp: "100",
-      smv: "15",
-      pph: "120",
-      eff: "60",
-      qty: "5000",
-      gCm: "1.2",
-      aCm: "1.1",
-      nFob: data.fob?.toString() || "7.50",
-      fFob: "8.0",
-      oMer: "ALAVI"
-    }]);
-    setIsQuotationDialogOpen(false);
+  const openEdit = (row: any) => {
+    setEditing(row);
+    setSelectedRow(row);
+    setIsQuotationDialogOpen(true);
+  };
+
+  const handleSaveQuotation = async (data: any) => {
+    const saved = await saveQuotation(data);
+    setSelectedRow({ ...saved, qtnNo: saved.quotationNo });
+  };
+
+  const handleDeleteSelected = async () => {
+    if (!selectedRow?.id || !quotations.some((row) => row.id === selectedRow.id)) {
+      toast.warning("Select a quotation first");
+      return;
+    }
+    try {
+      await deleteQuotation(selectedRow.id);
+      setSelectedRow(null);
+      toast.success("Quotation deleted");
+    } catch (error) {
+      toast.error("Delete failed", error instanceof Error ? error.message : undefined);
+    }
   };
 
   return (
@@ -85,32 +90,17 @@ export default function QuotationRegister() {
           <thead className="sticky top-0 bg-slate-200 shadow-sm z-10">
             {/* Filter Row */}
             <tr>
-              <th className="p-0.5 w-16"><FilterInput /></th>
-              <th className="p-0.5 w-16"><FilterInput /></th>
-              <th className="p-0.5 w-16"><FilterInput /></th>
-              <th className="p-0.5 w-8"></th>
-              <th className="p-0.5 w-24"><FilterInput /></th>
-              <th className="p-0.5 w-6"></th>
-              <th className="p-0.5 w-12"><FilterInput /></th>
-              <th className="p-0.5 w-6"></th>
-              <th className="p-0.5 w-24"><FilterInput /></th>
-              <th className="p-0.5 w-6"></th>
-              <th className="p-0.5 w-24"><FilterInput /></th>
-              <th className="p-0.5 w-24"><FilterInput /></th>
-              <th className="p-0.5 w-10"><FilterInput /></th>
-              <th className="p-0.5 w-10"><FilterInput /></th>
-              <th className="p-0.5 w-12"><FilterInput /></th>
-              <th className="p-0.5 w-10"><FilterInput /></th>
-              <th className="p-0.5 w-10"><FilterInput /></th>
-              <th className="p-0.5 w-16"><FilterInput /></th>
-              <th className="p-0.5 w-12"><FilterInput /></th>
-              <th className="p-0.5 w-12"><FilterInput /></th>
-              <th className="p-0.5 w-12"><FilterInput /></th>
-              <th className="p-0.5 w-12"><FilterInput /></th>
-              <th className="p-0.5 w-16"><FilterInput /></th>
-              <th className="p-0.5 w-6"><FilterInput /></th>
-              <th className="p-0.5 w-6"><div className="flex justify-center"><input type="checkbox" className="w-3 h-3" /></div></th>
-              <th className="p-0.5 w-24"><button className="bg-orange-500 text-white w-full h-full text-[9px] font-bold">App Status&gt;&gt;</button></th>
+              {filterFields.map((field, index) => (
+                <th key={`${field}-${index}`} className="p-0.5">
+                  {field ? (
+                    <input
+                      value={filters[field] || ""}
+                      onChange={(event) => setFilters((current) => ({ ...current, [field]: event.target.value }))}
+                      className="w-full h-4 text-[9px] border border-slate-300 px-0.5 focus:outline-none"
+                    />
+                  ) : null}
+                </th>
+              ))}
             </tr>
             {/* Header Row */}
             <tr>
@@ -139,11 +129,12 @@ export default function QuotationRegister() {
               <Th className="text-red-600">O/Mer</Th>
               <Th></Th>
               <Th></Th>
+              <Th>Edit</Th>
               <Th></Th>
             </tr>
           </thead>
           <tbody>
-            {localRows.map((row) => (
+            {displayRows.map((row) => (
               <tr 
                 key={row.id} 
                 onClick={() => setSelectedRow(row)}
@@ -151,7 +142,7 @@ export default function QuotationRegister() {
               >
                 <Td className="text-blue-700 border-r-0">{row.qtnDt}</Td>
                 <Td className="border-l-0">{row.delDt}</Td>
-                <Td></Td>
+                <Td>{row.option}</Td>
                 <Td className="text-center font-bold text-blue-800">ST</Td>
                 <Td>{row.qtnNo}</Td>
                 <Td className="text-center font-bold text-blue-800">R</Td>
@@ -173,8 +164,19 @@ export default function QuotationRegister() {
                 <Td className="text-right text-green-700 font-bold">{row.fFob}</Td>
                 <Td className="text-center">{row.oMer}</Td>
                 <Td className="text-center font-bold text-blue-800">&lt;&lt;</Td>
-                <Td className="text-center"><input type="checkbox" className="w-3 h-3" /></Td>
-                <Td className="bg-orange-500"></Td>
+                <Td className="text-center"><input type="checkbox" className="w-3 h-3" onClick={(event) => event.stopPropagation()} /></Td>
+                <Td className="text-center">
+                  <button
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      openEdit(row);
+                    }}
+                    className="bg-blue-600 text-white px-1.5 py-0.5 text-[9px] font-bold rounded-sm"
+                  >
+                    Edit
+                  </button>
+                </Td>
+                <Td className={`text-center font-bold text-white ${row.appStatus === "Draft" ? "bg-amber-500" : "bg-orange-500"}`}>{row.appStatus || ""}</Td>
               </tr>
             ))}
           </tbody>
@@ -183,8 +185,8 @@ export default function QuotationRegister() {
 
       {/* Footer Totals */}
       <div className="bg-slate-200 border-x border-t border-slate-300 mx-1 flex justify-between px-4 py-0.5 text-[11px] font-bold flex-shrink-0">
-        <div>Number of Qtn: <span className="text-slate-800 ml-1">{localRows.length}</span></div>
-        <div>Number of Buyer: <span className="text-slate-800 ml-1">...</span></div>
+        <div>Number of Qtn: <span className="text-slate-800 ml-1">{displayRows.length}</span></div>
+        <div>Number of Buyer: <span className="text-slate-800 ml-1">{new Set(displayRows.map((row) => row.buyer).filter(Boolean)).size}</span></div>
         <div>Buyer Ref: <span className="text-slate-800 ml-1">...</span></div>
         <div>Total Qty: <span className="text-slate-800 ml-1">...</span></div>
         <div>Number of Merchandiser: <span className="text-slate-800 ml-1">...</span></div>
@@ -278,7 +280,7 @@ export default function QuotationRegister() {
           <option>Qtn Dt</option>
         </select>
         
-        <button onClick={handleAddDummy} className="bg-orange-400 border border-orange-500 hover:bg-orange-500 text-white px-3 py-1 shadow-sm">Refresh</button>
+        <button onClick={() => refresh()} className="bg-orange-400 border border-orange-500 hover:bg-orange-500 text-white px-3 py-1 shadow-sm">Refresh</button>
         
         <div className="flex items-center gap-1">
           <span>Qty :</span>
@@ -302,8 +304,8 @@ export default function QuotationRegister() {
         <div className="hidden xl:block flex-1"></div>
         
         <div className="flex flex-wrap gap-2 justify-center w-full xl:w-auto mt-2 xl:mt-0">
-          <button className="bg-blue-100 border border-blue-400 text-blue-900 hover:bg-blue-200 px-4 py-1 shadow-sm">Order Entry</button>
-          <button onClick={() => setIsQuotationDialogOpen(true)} className="bg-blue-100 border border-blue-400 text-blue-900 hover:bg-blue-200 px-4 py-1 shadow-sm">Quotation Entry</button>
+          <button onClick={() => router.push("/app/merchandising/confirm-order")} className="bg-blue-100 border border-blue-400 text-blue-900 hover:bg-blue-200 px-4 py-1 shadow-sm">Order Entry</button>
+          <button onClick={openNew} className="bg-blue-100 border border-blue-400 text-blue-900 hover:bg-blue-200 px-4 py-1 shadow-sm">Quotation Entry</button>
           <button className="bg-teal-50 border border-teal-300 text-teal-900 hover:bg-teal-100 px-4 py-1 shadow-sm">Report</button>
           <button className="bg-green-600 border border-green-700 hover:bg-green-700 text-white px-4 py-1 shadow-sm">Excel.xls</button>
         </div>
@@ -317,14 +319,18 @@ export default function QuotationRegister() {
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               Brief Details: {selectedRow.qtnNo}
             </h3>
-            <button onClick={() => setSelectedRow(null)} className="text-red-500 hover:text-white hover:bg-red-500 rounded px-2 py-0.5 font-bold text-[10px] transition-colors">Close Details</button>
+            <div className="flex items-center gap-1">
+              <button onClick={() => openEdit(selectedRow)} className="bg-green-600 hover:bg-green-700 text-white rounded px-2 py-0.5 font-bold text-[10px]">Edit</button>
+              <button onClick={handleDeleteSelected} className="bg-red-600 hover:bg-red-700 text-white rounded px-2 py-0.5 font-bold text-[10px]">Delete</button>
+              <button onClick={() => setSelectedRow(null)} className="text-red-500 hover:text-white hover:bg-red-500 rounded px-2 py-0.5 font-bold text-[10px] transition-colors">Close Details</button>
+            </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-[10px]">
              <div className="bg-slate-50 p-1.5 rounded"><span className="font-semibold text-slate-500 block mb-0.5">Quotation Date:</span> <span className="font-bold text-slate-800">{selectedRow.qtnDt}</span></div>
-             <div className="bg-slate-50 p-1.5 rounded"><span className="font-semibold text-slate-500 block mb-0.5">Buyer:</span> <span className="font-bold text-slate-800">{selectedRow.buyer}</span></div>
+             <div className="bg-slate-50 p-1.5 rounded"><span className="font-semibold text-slate-500 block mb-0.5">Buyer:</span> <input value={selectedRow.buyer || ""} onChange={(e) => setSelectedRow({ ...selectedRow, buyer: e.target.value })} className="w-full border border-slate-300 h-5 px-1 font-bold text-slate-800" /></div>
              <div className="bg-slate-50 p-1.5 rounded"><span className="font-semibold text-slate-500 block mb-0.5">Garments Item:</span> <span className="font-bold text-slate-800">{selectedRow.gi}</span></div>
-             <div className="bg-slate-50 p-1.5 rounded"><span className="font-semibold text-slate-500 block mb-0.5">Order Qty:</span> <span className="font-bold text-slate-800">{selectedRow.qty}</span></div>
-             <div className="bg-green-50 border border-green-100 p-1.5 rounded"><span className="font-semibold text-green-700 block mb-0.5">Net FOB:</span> <span className="font-bold text-green-800">${selectedRow.nFob}</span></div>
+             <div className="bg-slate-50 p-1.5 rounded"><span className="font-semibold text-slate-500 block mb-0.5">Order Qty:</span> <input value={selectedRow.qty || ""} onChange={(e) => setSelectedRow({ ...selectedRow, qty: e.target.value })} className="w-full border border-slate-300 h-5 px-1 font-bold text-slate-800" /></div>
+             <div className="bg-green-50 border border-green-100 p-1.5 rounded"><span className="font-semibold text-green-700 block mb-0.5">Net FOB:</span> <input value={selectedRow.nFob || ""} onChange={(e) => setSelectedRow({ ...selectedRow, nFob: e.target.value })} className="w-full border border-green-200 h-5 px-1 font-bold text-green-800" /></div>
              
              <div className="bg-slate-50 p-1.5 rounded"><span className="font-semibold text-slate-500 block mb-0.5">Delivery Date:</span> <span className="font-bold text-slate-800">{selectedRow.delDt}</span></div>
              <div className="bg-slate-50 p-1.5 rounded"><span className="font-semibold text-slate-500 block mb-0.5">Our Ref:</span> <span className="font-bold text-slate-800">{selectedRow.ourRef}</span></div>
@@ -335,7 +341,18 @@ export default function QuotationRegister() {
         </div>
       )}
 
-      {isQuotationDialogOpen && <QuotationEntryDialog onClose={() => setIsQuotationDialogOpen(false)} onSave={handleSaveQuotation} />}
+      {isQuotationDialogOpen && (
+        <QuotationEntryDialog
+          key={editing?.id || "new"}
+          initial={editing}
+          buyers={buyers.map((buyer) => ({ id: buyer.id, name: buyer.name }))}
+          onClose={() => {
+            setIsQuotationDialogOpen(false);
+            setEditing(null);
+          }}
+          onSave={handleSaveQuotation}
+        />
+      )}
     </div>
   );
 }

@@ -40,13 +40,15 @@ import {
 } from "@/components/commercial/ui";
 import { InventoryItem, useInventoryData } from "@/hooks/useInventoryData";
 import { CuttingJob, useProductionData } from "@/hooks/useProductionData";
-import { orders as seedOrders } from "@/lib/seed-data";
+import { useErpRecords } from "@/hooks/useErpRecords";
 import { exportToExcel, exportToPDF } from "@/lib/commercialExport";
 import { formatDate, formatNumber } from "@/lib/commercialFormat";
 import { bn } from "@/lib/bn";
 import { toast } from "@/components/ui/Toast";
 
-const LOW_STOCK_THRESHOLD = 3000;
+function isLowStock(item: { received: number; balance: number }) {
+  return item.received > 0 && item.balance / item.received < 0.35;
+}
 
 type ItemFormState = {
   category: "fabric" | "trims" | "finished_fabric";
@@ -96,6 +98,7 @@ function InventoryContent() {
       : "fabric";
 
   const { inventory, stockLedger, addInventoryItem, updateInventoryItem } = useInventoryData();
+  const orders = useErpRecords((state) => state.data.orders);
   const { cuttingJobs } = useProductionData();
 
   const [search, setSearch] = useState("");
@@ -153,7 +156,7 @@ function InventoryContent() {
     const trims = inventory.filter((i) => i.category === "trims");
     const finished = inventory.filter((i) => i.category === "finished");
     const finishedFabric = inventory.filter((i) => i.category === "finished_fabric");
-    const lowStock = [...fabric, ...trims].filter((i) => i.balance < LOW_STOCK_THRESHOLD).length;
+    const lowStock = [...fabric, ...trims].filter((i) => isLowStock(i)).length;
     return {
       fabricItems: fabric.length,
       trimsItems: trims.length,
@@ -176,7 +179,7 @@ function InventoryContent() {
 
   function handleAddSubmit(e: FormEvent) {
     e.preventDefault();
-    const order = seedOrders.find((o) => o.id === form.orderId);
+    const order = orders.find((o) => o.id === form.orderId);
     if (!order) return;
     addInventoryItem({
       category: form.category,
@@ -480,7 +483,7 @@ function InventoryContent() {
                         {formatNumber(item.issued)} {item.unit}
                       </TableCell>
                       <TableCell>
-                        <Badge tone={item.balance < LOW_STOCK_THRESHOLD ? "red" : "green"}>
+                        <Badge tone={isLowStock(item) ? "red" : "green"}>
                           {formatNumber(item.balance)} {item.unit}
                         </Badge>
                       </TableCell>
@@ -549,7 +552,7 @@ function InventoryContent() {
               <Label required>{bn.procurement.selectOrder}</Label>
               <Select required value={form.orderId} onChange={(e) => setForm({ ...form, orderId: e.target.value })}>
                 <option value="">— {bn.procurement.selectOrder} —</option>
-                {seedOrders.map((o) => (
+                {orders.map((o) => (
                   <option key={o.id} value={o.id}>
                     {o.buyerName} — {o.poNumber} ({o.style})
                   </option>

@@ -66,7 +66,7 @@ const topLevel: NavLeaf[] = [
 
 const newMerchandisingSection: NavSection = {
   title: "Merchandising (New)",
-  titleBn: "মার্চেন্ডাইজিং (নতুন)",
+  titleBn: "Merchandising (New)",
   items: [
     {
       label: "QUOTATION",
@@ -118,7 +118,7 @@ const navSections: NavSection[] = [
   newMerchandisingSection,
   {
     title: "Commercial",
-    titleBn: "কমার্শিয়াল",
+    titleBn: "Commercial",
     items: [
       { label: "Buyers", href: "/app/buyers", icon: Users, module: "buyers" },
       { label: "Orders", href: "/app/orders", icon: ClipboardList, module: "orders" },
@@ -129,7 +129,7 @@ const navSections: NavSection[] = [
   },
   {
     title: "Procurement",
-    titleBn: "ক্রয়",
+    titleBn: "Procurement",
     items: [
       { label: "Fabric Booking", href: "/app/procurement?tab=fabric", icon: Layers, module: "procurement" },
       { label: "Trims Booking", href: "/app/procurement?tab=trims", icon: Ruler, module: "procurement" },
@@ -140,7 +140,7 @@ const navSections: NavSection[] = [
   },
   {
     title: "Inventory",
-    titleBn: "ইনভেন্টরি",
+    titleBn: "Inventory",
     items: [
       { label: "Fabric Stock", href: "/app/inventory?tab=fabric", icon: Boxes, module: "inventory" },
       { label: "Fin. Fabric Stock", href: "/app/inventory?tab=finished_fabric", icon: Layers, module: "inventory" },
@@ -152,7 +152,7 @@ const navSections: NavSection[] = [
   },
   {
     title: "HR & Admin",
-    titleBn: "এইচআর ও অ্যাডমিন",
+    titleBn: "HR & Admin",
     items: [
       { label: "Directory", href: "/app/hr?tab=directory", icon: Users, module: "hr" },
       { label: "Attendance", href: "/app/hr?tab=attendance", icon: Fingerprint, module: "hr" },
@@ -161,7 +161,7 @@ const navSections: NavSection[] = [
   },
   {
     title: "Composite Production",
-    titleBn: "কম্পোজিট উৎপাদন",
+    titleBn: "Composite Production",
     items: [
       { label: "Yarn Store", href: "/app/production/yarn", icon: Layers, module: "production" },
       { label: "Knitting", href: "/app/production/knitting", icon: Factory, module: "production" },
@@ -170,7 +170,7 @@ const navSections: NavSection[] = [
   },
   {
     title: "Garments Production",
-    titleBn: "গার্মেন্টস উৎপাদন",
+    titleBn: "Garments Production",
     items: [
       { label: "Production Monitoring (New)", href: "/app/production/monitoring", icon: FileBarChart, module: "production" },
       { label: "Cutting", href: "/app/production/cutting", icon: Scissors, module: "production" },
@@ -181,7 +181,7 @@ const navSections: NavSection[] = [
   },
   {
     title: "Quality",
-    titleBn: "কোয়ালিটি",
+    titleBn: "Quality",
     items: [
       { label: "Final Insp / QC (New)", href: "/app/qc/final-inspection", icon: FileCheck2, module: "quality-control" },
       { label: "Inline QC", href: "/app/quality-control?tab=inline", icon: ScanSearch, module: "quality-control" },
@@ -192,7 +192,7 @@ const navSections: NavSection[] = [
   },
   {
     title: "Shipment",
-    titleBn: "শিপমেন্ট",
+    titleBn: "Shipment",
     items: [
       { label: "Shipment & Docs (New)", href: "/app/shipment/documentation", icon: FileStack, module: "shipment" },
       { label: "Shipment Plan", href: "/app/shipment?tab=plan", icon: MapIcon, module: "shipment" },
@@ -203,7 +203,7 @@ const navSections: NavSection[] = [
   },
   {
     title: "Accounts",
-    titleBn: "হিসাব",
+    titleBn: "Accounts",
     items: [
       { label: "Buyer Ledger", href: "/app/accounts?tab=buyer", icon: BookUser, module: "accounts" },
       { label: "Supplier Ledger", href: "/app/accounts?tab=supplier", icon: Building2, module: "accounts" },
@@ -214,7 +214,7 @@ const navSections: NavSection[] = [
   },
   {
     title: "Reports",
-    titleBn: "রিপোর্ট",
+    titleBn: "Reports",
     items: [
       { label: "Order Reports", href: "/app/reports?tab=orders", icon: FileBarChart, module: "reports" },
       { label: "T&A Reports", href: "/app/reports?tab=ta_delay", icon: FileBarChart, module: "reports" },
@@ -295,7 +295,7 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
         <div className="min-w-0 leading-tight">
           <p className="truncate text-[13px] font-semibold tracking-wide">Dawat</p>
           <p className="truncate text-[10px] text-white/45">
-            {role ? `${role.titleBn}` : "RMG SOFT"}
+            {role ? role.title : "RMG SOFT"}
           </p>
         </div>
       </div>
@@ -327,7 +327,6 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
           <div key={section.title} className="mt-3.5">
             <p className="mb-1 px-2.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-white/35">
               {section.title}
-              <span className="ml-1 normal-case tracking-normal text-white/25">· {section.titleBn}</span>
             </p>
             <ul className="space-y-px">
               {section.items.map((item) => (
@@ -373,7 +372,7 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
           className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-[12px] text-white/75 transition-colors hover:bg-white/10 hover:text-white"
         >
           <LogOut className="h-3.5 w-3.5" />
-          Switch Panel / লগআউট
+          Switch panel
         </button>
         <p className="mt-1 px-2.5 pb-1 text-[9px] leading-snug text-white/30">Dawat RMG SOFT</p>
       </div>

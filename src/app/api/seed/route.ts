@@ -1,35 +1,20 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
-import { ErpDataModel } from "@/lib/models/ErpData";
-import { buildSeedData } from "@/lib/seed-data";
+import { reseedFromSeed } from "@/lib/db/repository";
 
 export const dynamic = "force-dynamic";
 
-const DOC_KEY = "main";
-
 /**
  * POST /api/seed
- * Force-reseeds the ERP dataset, overwriting whatever currently exists in
- * MongoDB with a fresh copy of `src/lib/seed-data.ts`. Used by
- * Settings → Data Management → "Reset Data".
+ * Rebuilds the normalized ERP collections from the seed dataset.
  */
 export async function POST() {
   try {
-    await connectToDatabase();
-
-    const freshData = buildSeedData();
-
-    const updated = await ErpDataModel.findOneAndUpdate(
-      { key: DOC_KEY },
-      { key: DOC_KEY, data: freshData },
-      { upsert: true, new: true }
-    ).lean();
-
+    const data = await reseedFromSeed();
     return NextResponse.json({
       success: true,
       message: "ERP demo data has been reseeded successfully.",
-      data: updated?.data,
-      updatedAt: updated?.updatedAt,
+      data,
+      updatedAt: new Date().toISOString(),
     });
   } catch (error) {
     console.error("[POST /api/seed] failed:", error);

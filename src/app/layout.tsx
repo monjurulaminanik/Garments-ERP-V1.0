@@ -21,7 +21,7 @@ const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "Dawat RMG SOFT";
 export const metadata: Metadata = {
   title: `${APP_NAME} | Bangladesh RMG Software`,
   description:
-    "Dawat RMG SOFT — অর্ডার কনফার্মেশন থেকে শিপমেন্ট পর্যন্ত—সব এক ERP-তে। Full-cycle garment export ERP for DAWAT GARMENTS LTD., Ashulia, Savar, Dhaka: buyers, orders, T&A, costing, procurement, production, QC, shipment and accounts.",
+    "Dawat RMG SOFT — from order confirmation to shipment, in one ERP. Full-cycle garment export ERP for DAWAT GARMENTS LTD., Ashulia, Savar, Dhaka: buyers, orders, T&A, costing, procurement, production, QC, shipment and accounts.",
   keywords: [
     "RMG ERP",
     "Garments ERP Bangladesh",

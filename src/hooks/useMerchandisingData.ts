@@ -29,11 +29,13 @@ export interface MerchandisingState {
 
   addQuotation: (input: Omit<Quotation, "id">) => Quotation;
   updateQuotation: (id: string, patch: Partial<Omit<Quotation, "id">>) => void;
-  deleteQuotation: (id: string) => void;
+  deleteQuotation: (id: string) => Promise<void>;
+  saveQuotation: (input: Omit<Quotation, "id"> & { id?: string }) => Promise<Quotation>;
 
   addConfirmOrder: (input: Omit<ConfirmOrder, "id">) => ConfirmOrder;
   updateConfirmOrder: (id: string, patch: Partial<Omit<ConfirmOrder, "id">>) => void;
   deleteConfirmOrder: (id: string) => void;
+  flushConfirmOrders: () => Promise<void>;
 
   addOrderStatus: (input: Omit<OrderStatus, "id">) => OrderStatus;
   updateOrderStatus: (id: string, patch: Partial<Omit<OrderStatus, "id">>) => void;
@@ -59,11 +61,55 @@ export interface MerchandisingState {
   updateAccEstimation: (id: string, patch: Partial<Omit<AccEstimation, "id">>) => void;
   deleteAccEstimation: (id: string) => void;
 
-  refresh: () => Promise<void>;
+  refresh: () => Promise<boolean>;
 }
 
+let merchandisingServerReady = false;
+
+function dedupeById<T extends { id: string }>(rows: T[]): T[] {
+  const map = new Map<string, T>();
+  for (const row of rows) {
+    if (!row?.id || map.has(row.id)) continue;
+    map.set(row.id, row);
+  }
+  return [...map.values()];
+}
+
+async function readMerchandising() {
+  const res = await fetch("/api/data?store=merchandising");
+  const json = await res.json();
+  if (!res.ok || !json?.success || !json.data) {
+    throw new Error(json?.error || "Could not load quotations.");
+  }
+  return json.data as Pick<
+    MerchandisingState,
+    | "quotations"
+    | "confirmOrders"
+    | "orderStatuses"
+    | "accRmBookings"
+    | "fabricBookings"
+    | "accessoriesBookings"
+    | "piRegisters"
+    | "accEstimations"
+  >;
+}
+
+async function writeMerchandising(data: Partial<Awaited<ReturnType<typeof readMerchandising>>>) {
+  const res = await fetch("/api/data?store=merchandising", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data }),
+  });
+  const json = await res.json();
+  if (!res.ok || !json?.success) {
+    throw new Error(json?.error || "Could not save quotation.");
+  }
+}
+
+let confirmFlush: Promise<void> = Promise.resolve();
+
 function persistToServer(state: Partial<MerchandisingState>) {
-  if (typeof window === "undefined") return;
+  if (!merchandisingServerReady || typeof window === "undefined") return;
   fetch("/api/data?store=merchandising", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -77,18 +123,7 @@ export const useMerchandisingData = create<MerchandisingState>()(
       const apply = (updater: (state: MerchandisingState) => Partial<MerchandisingState>) => {
         const next = updater(get());
         set(next);
-        const { 
-          addQuotation, updateQuotation, deleteQuotation, 
-          addConfirmOrder, updateConfirmOrder, deleteConfirmOrder,
-          addOrderStatus, updateOrderStatus, deleteOrderStatus,
-          addAccRmBooking, updateAccRmBooking, deleteAccRmBooking,
-          addFabricBooking, updateFabricBooking, deleteFabricBooking,
-          addAccessoriesBooking, updateAccessoriesBooking, deleteAccessoriesBooking,
-          addPiRegister, updatePiRegister, deletePiRegister,
-          addAccEstimation, updateAccEstimation, deleteAccEstimation,
-          refresh, ...dataToPersist 
-        } = { ...get(), ...next };
-        persistToServer(dataToPersist);
+        persistToServer(next);
       };
 
       return {
@@ -106,33 +141,75 @@ export const useMerchandisingData = create<MerchandisingState>()(
             const res = await fetch("/api/data?store=merchandising");
             const json = await res.json();
             if (json?.success && json.data) {
-              set({ ...json.data });
+              set({ ...json.data, quotations: dedupeById(json.data.quotations || []) });
+              merchandisingServerReady = true;
+              return true;
             }
           } catch (e) {}
+          return false;
         },
 
         addQuotation: (input) => {
-          const record: Quotation = { ...input, id: uid("qtn") };
-          apply((state) => ({ quotations: [record, ...state.quotations] }));
+          const record: Quotation = { ...input, id: uid("qtn"), appStatus: input.appStatus || "Draft" };
+          apply((state) => ({ quotations: dedupeById([record, ...state.quotations]) }));
           return record;
         },
         updateQuotation: (id, patch) => {
           apply((state) => ({ quotations: state.quotations.map(p => p.id === id ? { ...p, ...patch } : p) }));
         },
-        deleteQuotation: (id) => {
-          apply((state) => ({ quotations: state.quotations.filter(p => p.id !== id) }));
+        deleteQuotation: async (id) => {
+          const server = await readMerchandising();
+          const quotations = dedupeById((server.quotations || []).filter((row) => row.id !== id));
+          const next = { ...server, quotations };
+          await writeMerchandising(next);
+          set(next);
+          merchandisingServerReady = true;
+        },
+        saveQuotation: async (input) => {
+          const server = await readMerchandising();
+          const id = input.id || uid("qtn");
+          const record: Quotation = { ...input, id, appStatus: input.appStatus || "Draft" };
+          const quotations = dedupeById([
+            record,
+            ...(server.quotations || []).filter((row) => row.id !== id),
+          ]);
+          const next = { ...server, quotations };
+          await writeMerchandising(next);
+          set(next);
+          merchandisingServerReady = true;
+          return record;
         },
 
         addConfirmOrder: (input) => {
           const record: ConfirmOrder = { ...input, id: uid("co") };
-          apply((state) => ({ confirmOrders: [record, ...state.confirmOrders] }));
+          set({ confirmOrders: [record, ...get().confirmOrders] });
           return record;
         },
         updateConfirmOrder: (id, patch) => {
-          apply((state) => ({ confirmOrders: state.confirmOrders.map(p => p.id === id ? { ...p, ...patch } : p) }));
+          set({ confirmOrders: get().confirmOrders.map((row) => (row.id === id ? { ...row, ...patch } : row)) });
         },
         deleteConfirmOrder: (id) => {
-          apply((state) => ({ confirmOrders: state.confirmOrders.filter(p => p.id !== id) }));
+          set({ confirmOrders: get().confirmOrders.filter((row) => row.id !== id) });
+        },
+        flushConfirmOrders: () => {
+          const run = async () => {
+            if (!merchandisingServerReady) {
+              throw new Error("Orders are still loading.");
+            }
+            let latest = dedupeById(get().confirmOrders);
+            await writeMerchandising({ confirmOrders: latest });
+            const after = dedupeById(get().confirmOrders);
+            if (JSON.stringify(after) !== JSON.stringify(latest)) {
+              latest = after;
+              await writeMerchandising({ confirmOrders: latest });
+            }
+          };
+          const pending = confirmFlush.then(run, run);
+          confirmFlush = pending.then(
+            () => undefined,
+            () => undefined
+          );
+          return pending;
         },
 
         addOrderStatus: (input) => {
@@ -208,6 +285,6 @@ export const useMerchandisingData = create<MerchandisingState>()(
         },
       };
     },
-    { name: "same-dawat-erp-merchandising", version: 1 }
+    { name: "same-dawat-erp-merchandising", version: 1, skipHydration: true }
   )
 );

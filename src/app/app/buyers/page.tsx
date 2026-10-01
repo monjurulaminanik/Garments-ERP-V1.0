@@ -138,7 +138,7 @@ export default function BuyersPage() {
 
   async function handleExportPdf() {
     await exportToPDF({
-      title: "ক্রেতা / বায়ার তালিকা — Buyer List",
+      title: "Buyer list",
       subtitle: "Orders & payment history summary",
       columns: exportColumns,
       data: exportRows(),
@@ -181,7 +181,7 @@ export default function BuyersPage() {
 
       {/* KPI strip */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <KpiTile icon={<Users className="h-4 w-4" />} label="মোট ক্রেতা" value={formatNumber(buyers.length)} tone="teal" />
+        <KpiTile icon={<Users className="h-4 w-4" />} label="Total buyers" value={formatNumber(buyers.length)} tone="teal" />
         <KpiTile icon={<Package className="h-4 w-4" />} label={bn.buyers.totalOrders} value={formatNumber(orders.length)} tone="blue" />
         <KpiTile
           icon={<DollarSign className="h-4 w-4" />}
@@ -248,9 +248,9 @@ export default function BuyersPage() {
                         </div>
                       </div>
                       {stats.totalDue > 0 ? (
-                        <Badge tone="amber">বকেয়া</Badge>
+                        <Badge tone="amber">Due</Badge>
                       ) : (
-                        <Badge tone="green">পরিশোধিত</Badge>
+                        <Badge tone="green">Paid</Badge>
                       )}
                     </div>
                     <div className="mt-2 grid grid-cols-3 gap-1.5 border-t border-slate-100 pt-2 text-center">
@@ -299,7 +299,7 @@ export default function BuyersPage() {
                   <InfoRow icon={<Phone className="h-4 w-4" />} label={bn.buyers.phone} value={selectedBuyer.phone} />
                   <InfoRow icon={<Mail className="h-4 w-4" />} label={bn.buyers.email} value={selectedBuyer.email} />
                   <InfoRow icon={<MapPin className="h-4 w-4" />} label={bn.buyers.address} value={selectedBuyer.address} />
-                  <InfoRow icon={<Building2 className="h-4 w-4" />} label="যুক্ত হয়েছে" value={formatDate(selectedBuyer.createdAt)} />
+                  <InfoRow icon={<Building2 className="h-4 w-4" />} label="Added" value={formatDate(selectedBuyer.createdAt)} />
                 </CardContent>
               </Card>
 
@@ -322,10 +322,10 @@ export default function BuyersPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>PO / Style</TableHead>
-                        <TableHead>পণ্য</TableHead>
-                        <TableHead>পরিমাণ</TableHead>
-                        <TableHead>মূল্য</TableHead>
-                        <TableHead>শিপমেন্ট</TableHead>
+                        <TableHead>Product</TableHead>
+                        <TableHead>Quantity</TableHead>
+                        <TableHead>Value</TableHead>
+                        <TableHead>Shipment</TableHead>
                         <TableHead>{bn.status}</TableHead>
                       </TableRow>
                     </TableHeader>

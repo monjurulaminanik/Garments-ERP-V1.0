@@ -239,10 +239,10 @@ export default function OrdersPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <KpiTile icon={<Package className="h-5 w-5" />} label="মোট অর্ডার" value={formatNumber(orders.length)} tone="teal" />
-        <KpiTile icon={<Boxes className="h-5 w-5" />} label="মোট পরিমাণ" value={`${formatNumber(totalQty)} pcs`} tone="blue" />
-        <KpiTile icon={<DollarSign className="h-5 w-5" />} label="মোট মূল্য" value={formatMoney(totalValue)} tone="green" />
-        <KpiTile icon={<TriangleAlert className="h-5 w-5" />} label="বিলম্বিত অর্ডার" value={formatNumber(delayedCount)} tone="red" />
+        <KpiTile icon={<Package className="h-5 w-5" />} label="Total orders" value={formatNumber(orders.length)} tone="teal" />
+        <KpiTile icon={<Boxes className="h-5 w-5" />} label="Total quantity" value={`${formatNumber(totalQty)} pcs`} tone="blue" />
+        <KpiTile icon={<DollarSign className="h-5 w-5" />} label="Total value" value={formatMoney(totalValue)} tone="green" />
+        <KpiTile icon={<TriangleAlert className="h-5 w-5" />} label="Delayed orders" value={formatNumber(delayedCount)} tone="red" />
       </div>
 
       <Card>

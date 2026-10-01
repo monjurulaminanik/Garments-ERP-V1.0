@@ -1,7 +1,8 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Menu, X } from "lucide-react";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppTopbar } from "@/components/layout/AppTopbar";
 import { RoleGuard } from "@/components/layout/RoleGuard";
@@ -18,6 +19,7 @@ const SIDEBAR_W = "w-[248px]";
 const MAIN_OFFSET = "lg:pl-[248px]";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   
   const ensureLoadedErp = useErpRecords((state) => state.ensureLoaded);
@@ -74,6 +76,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className={cn("flex min-h-dvh flex-col", MAIN_OFFSET)}>
         <div className="sticky top-0 z-20 flex h-12 items-center justify-between border-b border-[#E2E8EA] bg-white/95 px-3 backdrop-blur lg:hidden">
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="inline-flex h-8 items-center gap-1 rounded-md border border-[#E2E8EA] px-2 text-[12px] font-semibold text-[#0F4C5C]"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back
+            </button>
             <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[#0F4C5C] text-[11px] font-bold text-white">
               DR
             </span>

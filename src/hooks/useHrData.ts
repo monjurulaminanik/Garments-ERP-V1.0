@@ -18,8 +18,11 @@ interface HrStore {
   refresh: () => Promise<void>;
 }
 
+let hrServerReady = false;
+
 export const useHrData = create<HrStore>((set, get) => {
   const persistToServer = async (nextState: Partial<HrStore>) => {
+    if (!hrServerReady) return;
     try {
       const { employees, attendance, payroll } = { ...get(), ...nextState };
       const dataToPersist = { employees, attendance, payroll };
@@ -27,7 +30,7 @@ export const useHrData = create<HrStore>((set, get) => {
       const res = await fetch("/api/data?store=hr", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataToPersist),
+        body: JSON.stringify({ data: dataToPersist }),
       });
       if (!res.ok) {
         console.error("[useHrData] Failed to persist hr data");
@@ -108,6 +111,7 @@ export const useHrData = create<HrStore>((set, get) => {
               attendance: data.attendance || [],
               payroll: data.payroll || [],
             });
+            hrServerReady = true;
           }
         }
       } catch (e) {

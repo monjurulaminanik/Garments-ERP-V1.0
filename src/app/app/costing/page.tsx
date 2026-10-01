@@ -77,8 +77,8 @@ export default function CostingPage() {
   const [form, setForm] = useState<CostingFormState>(emptyForm);
   const [quoteForm, setQuoteForm] = useState({ date: "", offeredPrice: "", validUntil: "", status: "Pending", buyerFeedback: "" });
 
-  function qtyForStyle(style: string) {
-    return orders.find((o) => o.style === style)?.qty ?? 0;
+  function qtyForCosting(costing: { orderId?: string; style: string }) {
+    return orders.find((o) => o.id === costing.orderId)?.qty ?? orders.find((o) => o.style === costing.style)?.qty ?? 0;
   }
 
   const filteredCostings = useMemo(() => {
@@ -90,18 +90,18 @@ export default function CostingPage() {
   }, [costings, search]);
 
   const selectedCosting = costings.find((c) => c.style === selectedStyle) ?? costings[0] ?? null;
-  const selectedQty = selectedCosting ? qtyForStyle(selectedCosting.style) : 0;
+  const selectedQty = selectedCosting ? qtyForCosting(selectedCosting) : 0;
 
   const avgMargin =
     costings.length === 0
       ? 0
-      : costings.reduce((sum, c) => sum + costingMarginPct(c, qtyForStyle(c.style)), 0) / costings.length;
+      : costings.reduce((sum, c) => sum + costingMarginPct(c, qtyForCosting(c)), 0) / costings.length;
 
-  const uncostedOrders = orders.filter((o) => !costings.some((c) => c.style === o.style));
+  const uncostedOrders = orders.filter((o) => !costings.some((c) => c.orderId === o.id));
 
   function openEdit(costing: Costing) {
     setForm({
-      orderId: orders.find((o) => o.style === costing.style)?.id ?? "",
+      orderId: costing.orderId || orders.find((o) => o.style === costing.style)?.id || "",
       fabricName: costing.fabricName,
       garmentWeight: String(costing.garmentWeight),
       consumption: String(costing.consumption),
@@ -120,6 +120,7 @@ export default function CostingPage() {
     const order = orders.find((o) => o.id === form.orderId);
     if (!order) return;
     const created = addCosting({
+      orderId: order.id,
       buyer: order.buyer,
       style: order.style,
       fabricName: form.fabricName,
@@ -204,7 +205,7 @@ export default function CostingPage() {
       cmCost: formatMoney(c.cmCost),
       totalCost: formatMoney(costingTotal(c)),
       unitPrice: formatMoney(c.unitPrice),
-      margin: `${costingMarginPct(c, qtyForStyle(c.style)).toFixed(1)}%`,
+      margin: `${costingMarginPct(c, qtyForCosting(c)).toFixed(1)}%`,
     }));
   }
 
@@ -234,7 +235,7 @@ export default function CostingPage() {
           </Button>
           <Button onClick={() => { setForm(emptyForm); setAddOpen(true); }} disabled={uncostedOrders.length === 0}>
             <Plus className="h-4 w-4" />
-            নতুন কস্টিং
+            New costing
           </Button>
         </div>
       </div>
@@ -244,11 +245,11 @@ export default function CostingPage() {
         <KpiTile icon={<TrendingUp className="h-5 w-5" />} label={bn.costing.avgMargin} value={`${avgMargin.toFixed(1)}%`} tone="green" />
         <KpiTile
           icon={<Calculator className="h-5 w-5" />}
-          label="মোট কস্টিং মূল্য"
+          label="Total costing value"
           value={formatMoney(costings.reduce((s, c) => s + costingTotal(c), 0))}
           tone="blue"
         />
-        <KpiTile icon={<Layers className="h-5 w-5" />} label="আনকস্টেড স্টাইল" value={formatNumber(uncostedOrders.length)} tone="amber" />
+        <KpiTile icon={<Layers className="h-5 w-5" />} label="Uncosted styles" value={formatNumber(uncostedOrders.length)} tone="amber" />
       </div>
 
       <Card>
@@ -305,7 +306,7 @@ export default function CostingPage() {
                 <p className="text-lg font-bold text-slate-800">{formatMoney(selectedCosting.unitPrice)}</p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-slate-500">অর্ডার পরিমাণ</p>
+                <p className="text-xs text-slate-500">Order quantity</p>
                 <p className="text-lg font-bold text-slate-800">{formatNumber(selectedQty)} pcs</p>
               </div>
               <Button variant="outline" size="sm" onClick={() => openEdit(selectedCosting)}>
@@ -402,7 +403,7 @@ export default function CostingPage() {
             </TableHeader>
             <TableBody>
               {filteredCostings.map((c) => {
-                const qty = qtyForStyle(c.style);
+                const qty = qtyForCosting(c);
                 const margin = costingMarginPct(c, qty);
                 return (
                   <TableRow key={c.id} className={c.style === selectedCosting?.style ? "bg-teal-50/50" : undefined}>
@@ -446,12 +447,12 @@ export default function CostingPage() {
       </Card>
 
       {/* Add costing modal */}
-      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="নতুন কস্টিং" size="lg">
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="New costing" size="lg">
         <form onSubmit={handleAddSubmit} className="space-y-4">
           <div>
             <Label required>{bn.orders.style}</Label>
             <Select required value={form.orderId} onChange={(e) => setForm({ ...form, orderId: e.target.value })}>
-              <option value="">— স্টাইল নির্বাচন করুন —</option>
+              <option value="">— Select a style —</option>
               {uncostedOrders.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.buyer} — {o.style} ({o.product})
@@ -477,19 +478,19 @@ export default function CostingPage() {
               <Input required type="number" min={0} step="0.01" value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: e.target.value })} placeholder="3.85" />
             </div>
             <div>
-              <Label required>{bn.costing.fabricCost} (মোট)</Label>
+              <Label required>{bn.costing.fabricCost} (total)</Label>
               <Input required type="number" min={0} value={form.fabricCost} onChange={(e) => setForm({ ...form, fabricCost: e.target.value })} placeholder="94020" />
             </div>
             <div>
-              <Label required>{bn.costing.trimsCost} (মোট)</Label>
+              <Label required>{bn.costing.trimsCost} (total)</Label>
               <Input required type="number" min={0} value={form.trimsCost} onChange={(e) => setForm({ ...form, trimsCost: e.target.value })} placeholder="16800" />
             </div>
             <div>
-              <Label required>{bn.costing.cmCost} (মোট)</Label>
+              <Label required>{bn.costing.cmCost} (total)</Label>
               <Input required type="number" min={0} value={form.cmCost} onChange={(e) => setForm({ ...form, cmCost: e.target.value })} placeholder="52800" />
             </div>
             <div>
-              <Label>Processing Cost (মোট)</Label>
+              <Label>Processing Cost (total)</Label>
               <Input type="number" min={0} value={form.processingCost} onChange={(e) => setForm({ ...form, processingCost: e.target.value })} placeholder="0" />
             </div>
             <div>
@@ -525,7 +526,7 @@ export default function CostingPage() {
             <ViewField label="Commercial & Overhead" value={formatMoney(viewCosting.commercialCost)} />
             <ViewField label={bn.costing.totalCost} value={formatMoney(costingTotal(viewCosting))} />
             <ViewField label={bn.costing.unitPrice} value={formatMoney(viewCosting.unitPrice)} />
-            <ViewField label={bn.costing.margin} value={`${costingMarginPct(viewCosting, qtyForStyle(viewCosting.style)).toFixed(1)}%`} />
+            <ViewField label={bn.costing.margin} value={`${costingMarginPct(viewCosting, qtyForCosting(viewCosting)).toFixed(1)}%`} />
           </div>
         )}
       </Modal>
@@ -557,19 +558,19 @@ export default function CostingPage() {
                 <Input required type="number" min={0} step="0.01" value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: e.target.value })} />
               </div>
               <div>
-                <Label required>{bn.costing.fabricCost} (মোট)</Label>
+                <Label required>{bn.costing.fabricCost} (total)</Label>
                 <Input required type="number" min={0} value={form.fabricCost} onChange={(e) => setForm({ ...form, fabricCost: e.target.value })} />
               </div>
               <div>
-                <Label required>{bn.costing.trimsCost} (মোট)</Label>
+                <Label required>{bn.costing.trimsCost} (total)</Label>
                 <Input required type="number" min={0} value={form.trimsCost} onChange={(e) => setForm({ ...form, trimsCost: e.target.value })} />
               </div>
               <div>
-                <Label required>{bn.costing.cmCost} (মোট)</Label>
+                <Label required>{bn.costing.cmCost} (total)</Label>
                 <Input required type="number" min={0} value={form.cmCost} onChange={(e) => setForm({ ...form, cmCost: e.target.value })} />
               </div>
               <div>
-                <Label>Processing Cost (মোট)</Label>
+                <Label>Processing Cost (total)</Label>
                 <Input type="number" min={0} value={form.processingCost} onChange={(e) => setForm({ ...form, processingCost: e.target.value })} />
               </div>
               <div>

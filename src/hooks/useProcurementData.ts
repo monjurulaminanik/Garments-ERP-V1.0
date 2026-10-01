@@ -33,8 +33,10 @@ interface ProcurementState {
   refresh: () => Promise<void>;
 }
 
+let procurementServerReady = false;
+
 function persistToServer(state: Omit<ProcurementState, "addProcurement" | "updateProcurement" | "deleteProcurement" | "refresh">) {
-  if (typeof window === "undefined") return;
+  if (!procurementServerReady || typeof window === "undefined") return;
   fetch("/api/data?store=procurement", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -61,6 +63,7 @@ export const useProcurementData = create<ProcurementState>()(
             const json = await res.json();
             if (json?.success && json.data) {
               set({ ...json.data });
+              procurementServerReady = true;
             }
           } catch (e) {}
         },

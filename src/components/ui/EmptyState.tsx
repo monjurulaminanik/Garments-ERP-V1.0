@@ -12,7 +12,7 @@ export interface EmptyStateProps {
 }
 
 export function EmptyState({
-  title = "কোনো তথ্য পাওয়া যায়নি",
+  title = "No records found",
   subtitle = "No records found for the selected filters.",
   icon: Icon = Inbox,
   action,
