@@ -24,7 +24,7 @@ import {
 import { Package } from "lucide-react";
 import { CuttingJob, useProductionData } from "@/hooks/useProductionData";
 import type { CuttingStatus } from "@/lib/types";
-import { orders as seedOrders } from "@/lib/seed-data";
+import { useErpRecords } from "@/hooks/useErpRecords";
 import { exportToExcel, exportToPDF } from "@/lib/commercialExport";
 import { formatDate, formatNumber } from "@/lib/commercialFormat";
 import { bn } from "@/lib/bn";
@@ -57,6 +57,7 @@ const emptyForm: FormState = {
 
 export default function CuttingPage() {
   const { cuttingJobs, addCuttingJob, updateCuttingJob } = useProductionData();
+  const orders = useErpRecords((state) => state.data.orders);
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -94,7 +95,7 @@ export default function CuttingPage() {
 
   function handleAddSubmit(e: FormEvent) {
     e.preventDefault();
-    const order = seedOrders.find((o) => o.id === form.orderId);
+    const order = orders.find((o) => o.id === form.orderId);
     if (!order) return;
     addCuttingJob({
       orderId: order.id,
@@ -185,7 +186,7 @@ export default function CuttingPage() {
             }}
           >
             <Plus className="h-4 w-4" />
-            নতুন কাটিং জব
+            New cutting job
           </Button>
         </div>
       </div>
@@ -202,7 +203,7 @@ export default function CuttingPage() {
       {activeTab === "cutting" && (
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <KpiTile icon={<Layers className="h-5 w-5" />} label="মোট ফেব্রিক ইস্যু" value={`${formatNumber(kpis.totalIssued)} pcs`} tone="teal" />
+            <KpiTile icon={<Layers className="h-5 w-5" />} label="Total fabric issued" value={`${formatNumber(kpis.totalIssued)} pcs`} tone="teal" />
             <KpiTile icon={<Scissors className="h-5 w-5" />} label={bn.production.cutting.totalCut} value={`${formatNumber(kpis.totalCut)} pcs`} tone="blue" />
             <KpiTile icon={<TriangleAlert className="h-5 w-5" />} label={bn.production.cutting.totalReject} value={`${formatNumber(kpis.totalReject)} pcs`} tone="red" />
             <KpiTile icon={<Scissors className="h-5 w-5" />} label={bn.production.cutting.inProgress} value={formatNumber(kpis.inProgress)} tone="green" />
@@ -347,14 +348,14 @@ export default function CuttingPage() {
       )}
 
       {/* Add cutting job modal */}
-      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="নতুন কাটিং জব" size="lg">
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="New cutting job" size="lg">
         <form onSubmit={handleAddSubmit} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <Label required>{bn.procurement.selectOrder}</Label>
               <Select required value={form.orderId} onChange={(e) => setForm({ ...form, orderId: e.target.value })}>
                 <option value="">— {bn.procurement.selectOrder} —</option>
-                {seedOrders.map((o) => (
+                {orders.map((o) => (
                   <option key={o.id} value={o.id}>
                     {o.buyerName} — {o.poNumber} ({o.style})
                   </option>

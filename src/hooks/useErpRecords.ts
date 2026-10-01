@@ -74,8 +74,8 @@ interface ErpRecordsState {
 
 let loadTriggered = false;
 
-function persistToServer(data: ErpData) {
-  if (typeof window === "undefined") return;
+function persistToServer(data: ErpData, hydrated: boolean) {
+  if (!hydrated || typeof window === "undefined") return;
   fetch("/api/data", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -88,7 +88,7 @@ function persistToServer(data: ErpData) {
 export const useErpRecords = create<ErpRecordsState>()((set, get) => {
   const apply = (updater: (data: ErpData) => ErpData) => {
     const next = updater(get().data);
-    persistToServer(next);
+    persistToServer(next, get().hydrated);
     set({ data: next });
     return next;
   };
@@ -115,7 +115,7 @@ export const useErpRecords = create<ErpRecordsState>()((set, get) => {
         if (json?.success && json.data) {
           set({ data: json.data as ErpData, loading: false, hydrated: true, lastSyncedAt: json.updatedAt ?? null });
         } else {
-          set({ loading: false, hydrated: true, error: json?.error ?? "Failed to load ERP data." });
+          set({ loading: false, hydrated: false, error: json?.error ?? "Failed to load ERP data." });
         }
       } catch (err) {
         set({
@@ -205,7 +205,7 @@ export const useErpRecords = create<ErpRecordsState>()((set, get) => {
 
     importData: (next) => {
       set({ data: next });
-      persistToServer(next);
+      persistToServer(next, true);
     },
 
     clearTransactional: () => {

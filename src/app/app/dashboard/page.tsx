@@ -55,37 +55,37 @@ const DASHBOARD_COPY: Record<
 > = {
   super: {
     title: "Super Admin Dashboard",
-    titleBn: "সুপার অ্যাডমিন",
+    titleBn: "Super Admin",
     subtitle: "Full ERP overview — orders, production, QC, shipment and accounts",
   },
   owner: {
     title: "Executive Dashboard",
-    titleBn: "মালিক / পরিচালক",
+    titleBn: "Owner / Director",
     subtitle: "KPI, shipment readiness and profit status for management decisions",
   },
   merchandiser: {
     title: "Merchandising Dashboard",
-    titleBn: "মার্চেন্ডাইজিং",
+    titleBn: "Merchandising",
     subtitle: "Running orders, T&A delays, samples and material readiness",
   },
   production: {
     title: "Production Dashboard",
-    titleBn: "প্রোডাকশন",
+    titleBn: "Production",
     subtitle: "Cutting, sewing, finishing output and line efficiency",
   },
   qc: {
     title: "Quality Control Dashboard",
-    titleBn: "কোয়ালিটি কন্ট্রোল",
+    titleBn: "Quality Control",
     subtitle: "Inline / endline / final inspection, fail rate and defects",
   },
   store: {
     title: "Store & Inventory Dashboard",
-    titleBn: "স্টোর ম্যানেজার",
+    titleBn: "Store Manager",
     subtitle: "Fabric, trims, in-house status and stock movement",
   },
   accounts: {
     title: "Accounts Dashboard",
-    titleBn: "অ্যাকাউন্টস",
+    titleBn: "Accounts",
     subtitle: "Buyer/supplier ledgers, collections and profit & loss",
   },
 };
@@ -190,13 +190,13 @@ export default function ExecutiveDashboardPage() {
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#E36414]">
-            {copy.titleBn} · Panel
+            {copy.title} · Panel
           </p>
           <h1 className="font-sans text-lg font-bold tracking-tight text-ink-900 sm:text-xl">
             {copy.title}
           </h1>
           <p className="text-[12px] text-ink-500">
-            {copy.subtitle} · আজ, {today}
+            {copy.subtitle} · Today, {today}
           </p>
         </div>
         <ExportBar

@@ -25,7 +25,7 @@ export function FilterBar({ children, onReset, onApply, className }: FilterBarPr
         <div className="flex items-center justify-end gap-2 border-t border-brand-border pt-3">
           {onReset && (
             <Button variant="outline" size="sm" onClick={onReset} leftIcon={<RotateCcw className="h-3.5 w-3.5" />}>
-              রিসেট
+              Reset
             </Button>
           )}
           {onApply && (

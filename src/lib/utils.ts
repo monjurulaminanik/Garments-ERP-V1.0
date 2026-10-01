@@ -60,77 +60,22 @@ export function formatNumber(value: number | null | undefined, options?: { decim
   }).format(amount);
 }
 
-const BN_MONTHS = [
-  "জানুয়ারি",
-  "ফেব্রুয়ারি",
-  "মার্চ",
-  "এপ্রিল",
-  "মে",
-  "জুন",
-  "জুলাই",
-  "আগস্ট",
-  "সেপ্টেম্বর",
-  "অক্টোবর",
-  "নভেম্বর",
-  "ডিসেম্বর",
-];
-
-const BN_WEEKDAYS = [
-  "রবিবার",
-  "সোমবার",
-  "মঙ্গলবার",
-  "বুধবার",
-  "বৃহস্পতিবার",
-  "শুক্রবার",
-  "শনিবার",
-];
-
-const BN_DIGITS: Record<string, string> = {
-  "0": "০",
-  "1": "১",
-  "2": "২",
-  "3": "৩",
-  "4": "৪",
-  "5": "৫",
-  "6": "৬",
-  "7": "৭",
-  "8": "৮",
-  "9": "৯",
-};
-
-/**
- * Convert ASCII digits in a string to Bangla (Bengali) numerals.
- */
+/** Kept for older callers. Digits stay in English. */
 export function toBanglaDigits(input: string | number): string {
-  return String(input).replace(/[0-9]/g, (digit) => BN_DIGITS[digit] ?? digit);
+  return String(input);
 }
 
-/**
- * Format a date (ISO string or Date) in Bangla, e.g. "২৭ জুলাই ২০২৬".
- * Pass `withWeekday: true` to prefix the Bangla weekday name.
- */
+/** English date. The name is historical. */
 export function formatDateBn(
   input: string | number | Date | null | undefined,
   options?: { withWeekday?: boolean }
 ): string {
-  if (!input) return "—";
-  const date = input instanceof Date ? input : new Date(input);
-  if (Number.isNaN(date.getTime())) return "—";
-
-  const day = toBanglaDigits(date.getDate());
-  const month = BN_MONTHS[date.getMonth()];
-  const year = toBanglaDigits(date.getFullYear());
-  const base = `${day} ${month} ${year}`;
-
-  if (options?.withWeekday) {
-    return `${BN_WEEKDAYS[date.getDay()]}, ${base}`;
-  }
-  return base;
+  return formatDate(input, options?.withWeekday ? { weekday: "long", day: "numeric", month: "long", year: "numeric" } : { day: "numeric", month: "long", year: "numeric" });
 }
 
-/** Alias kept for compatibility: `bnDate(new Date())` -> "২৭ জুলাই, ২০২৬". */
+/** English date, kept under the old name so existing pages stay in English. */
 export function bnDate(date: Date = new Date()): string {
-  return `${toBanglaDigits(date.getDate())} ${BN_MONTHS[date.getMonth()]}, ${toBanglaDigits(date.getFullYear())}`;
+  return formatDate(date, { day: "numeric", month: "long", year: "numeric" });
 }
 
 /**

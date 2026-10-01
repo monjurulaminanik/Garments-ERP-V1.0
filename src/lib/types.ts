@@ -139,8 +139,84 @@ export interface Sample {
   notes: string;
 }
 
+export interface QuotationFabricLine {
+  id: number;
+  usedPlace: string;
+  supplier: string;
+  status: string;
+  fabricCode: string;
+  millCode: string;
+  fabricDesc: string;
+  width: string;
+  actCons: string;
+  quotedCons: string;
+  wPercent: string;
+  unit: string;
+  preQtdPrice: string;
+  quotedPrice: string;
+}
+
+export interface QuotationTrimLine {
+  id: number;
+  usedPlace: string;
+  trimsName: string;
+  description: string;
+  supplier: string;
+  status: string;
+  consDz: string;
+  unit: string;
+  wPercent: string;
+  packUnit: string;
+  prePrice: string;
+  quotedPrice: string;
+}
+
+export interface QuotationEntryData {
+  garmentType: string;
+  orderType: string;
+  ourRef: string;
+  quotationNo: string;
+  maskingNo: string;
+  buyer: string;
+  buyerId?: string;
+  season: string;
+  option: string;
+  tna: string;
+  revisedNo: string;
+  offerFob: string;
+  merchandiser: string;
+  accountHolder: string;
+  styleNo: string;
+  gi: string;
+  department: string;
+  styleItem: string;
+  qty: string;
+  delivery: string;
+  firstDelivery: string;
+  offerNo: string;
+  offerStatus: string;
+  submitDate: string;
+  amendment: string;
+  financePercent: string;
+  machineEff: string;
+  smv: string;
+  attachment?: string;
+  fabricRows: QuotationFabricLine[];
+  trimsRows: QuotationTrimLine[];
+  costing: {
+    financeCost: string;
+    cmLaborCost: string;
+    overheadCost: string;
+    commission: string;
+    buyingOp: string;
+    fob: string;
+  };
+}
+
 export interface Quotation {
   id: string;
+  orderId?: string;
+  buyerId?: string;
   qtnDt: string;
   delDt: string;
   option: string;
@@ -161,10 +237,13 @@ export interface Quotation {
   fFob: string;
   oMer: string;
   appStatus: string;
+  entry?: QuotationEntryData;
 }
 
 export interface ConfirmOrder {
   id: string;
+  orderId?: string;
+  buyerId?: string;
   lot: string;
   po: string;
   lcContact: string;
@@ -180,10 +259,61 @@ export interface ConfirmOrder {
   cuttableQty: string;
   delMode: string;
   delPort: string;
+  orderType?: string;
+  ourRef?: string;
+  quotationId?: string;
+  quotationNo?: string;
+  qtnQty?: string;
+  unit?: string;
+  buyerName?: string;
+  buyerDept?: string;
+  buyerMer?: string;
+  agent?: string;
+  agentDept?: string;
+  agentMer?: string;
+  merchandiser?: string;
+  accountHolder?: string;
+  buyerStyle?: string;
+  styleType?: string;
+  program?: string;
+  gmtItem?: string;
+  sType?: string;
+  packType?: string;
+  note?: string;
+  payMode?: string;
+  tenors?: string;
+  lcUp?: string;
+  priceType?: string;
+  season?: string;
+  year?: string;
+  orderStatus?: string;
+  entryDt?: string;
+  firstDel?: string;
+  confDt?: string;
+  qtdSmv?: string;
+  ieSmv?: string;
+  manpower?: string;
+  eff100?: string;
+  pphTgt?: string;
+  effPercent?: string;
+  commLocal?: string;
+  commForeign?: string;
+  commSpecial?: string;
+  wash?: string;
+  printOpt?: string;
+  embroidery?: string;
+  comments?: string;
+  olt?: string;
+  pcd?: string;
+  sizeOpt?: string;
+  bookingHold?: string;
+  attachment?: string;
 }
 
 export interface OrderStatus {
   id: string;
+  orderId?: string;
+  buyerId?: string;
   chDt: string;
   v: string;
   mer: string;
@@ -207,6 +337,8 @@ export interface OrderStatus {
 
 export interface AccRmBooking {
   id: string;
+  orderId?: string;
+  buyerId?: string;
   buyer: string;
   c: string;
   s: string;
@@ -235,6 +367,8 @@ export interface AccRmBooking {
 
 export interface FabricBooking {
   id: string;
+  orderId?: string;
+  buyerId?: string;
   color: string;
   consump: number;
   unit: string;
@@ -253,13 +387,23 @@ export interface FabricBooking {
 
 export interface AccessoriesBooking {
   id: string;
+  orderId?: string;
+  buyerId?: string;
   orderNo: string;
   item: string;
+  name?: string;
   color: string;
   size: string;
   reqQty: number;
+  est?: number;
   allowance: number;
   bookQty: number;
+  booked?: number;
+  amt?: number;
+  delDate?: string;
+  payment?: string;
+  unit?: string;
+  rate?: number;
   supplier: string;
   targetDate: string;
   status: "Pending" | "Booked" | "In-House";
@@ -267,6 +411,8 @@ export interface AccessoriesBooking {
 
 export interface PiRegister {
   id: string;
+  orderId?: string;
+  buyerId?: string;
   piNo: string;
   date: string;
   ref: string;
@@ -284,6 +430,8 @@ export interface PiRegister {
 
 export interface AccEstimation {
   id: string;
+  orderId?: string;
+  buyerId?: string;
   name: string;
   status: string;
   place: string;
@@ -318,6 +466,7 @@ export interface Costing {
 export interface Procurement {
   id: string;
   type: ProcurementType;
+  supplierId?: string;
   supplier: string;
   item: string;
   orderId: string;
@@ -352,6 +501,9 @@ export interface InventoryItem {
 
 export interface StockLedgerEntry {
   id: string;
+  inventoryItemId?: string;
+  procurementId?: string;
+  orderId?: string;
   itemName: string;
   date: string;
   ref: string;
@@ -439,6 +591,7 @@ export interface Defect {
   defectType: string;
   occurrences: number;
   totalDefectQty: number;
+  qcRecordIds?: string[];
 }
 
 export interface ShipmentDocuments {
@@ -481,6 +634,7 @@ export interface BuyerLedgerEntry {
 
 export interface SupplierLedgerEntry {
   id: string;
+  supplierId?: string;
   supplierName: string;
   purchaseValue: number;
   paidValue: number;
@@ -499,6 +653,7 @@ export interface Expense {
 
 export interface Payment {
   id: string;
+  partyId?: string;
   party: string;
   partyType: PaymentPartyType;
   date: string;

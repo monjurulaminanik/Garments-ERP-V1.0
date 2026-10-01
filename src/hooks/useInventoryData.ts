@@ -63,8 +63,10 @@ interface InventoryState {
   refresh: () => Promise<void>;
 }
 
+let inventoryServerReady = false;
+
 function persistToServer(state: Omit<InventoryState, "addInventoryItem" | "updateInventoryItem" | "deleteInventoryItem" | "addLedgerEntry" | "refresh">) {
-  if (typeof window === "undefined") return;
+  if (!inventoryServerReady || typeof window === "undefined") return;
   fetch("/api/data?store=inventory", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -92,6 +94,7 @@ export const useInventoryData = create<InventoryState>()(
             const json = await res.json();
             if (json?.success && json.data) {
               set({ ...json.data });
+              inventoryServerReady = true;
             }
           } catch (e) {}
         },

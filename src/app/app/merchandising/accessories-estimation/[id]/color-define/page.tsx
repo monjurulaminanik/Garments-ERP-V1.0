@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "@/components/ui/Toast";
 
 // Dense components
 const Th = ({ children, className }: { children: React.ReactNode; className?: string }) => (
@@ -175,7 +176,7 @@ export default function AccessoriesEstimationColorDefine({ params }: { params: {
       {/* Action Buttons */}
       <div className="mt-4 flex justify-end gap-2">
         <button 
-          onClick={() => { alert("Saved color define data"); router.back(); }}
+          onClick={() => { toast.success("Color define saved"); router.back(); }}
           className="bg-white border border-slate-400 hover:bg-slate-100 px-8 py-1.5 text-[12px] font-bold text-slate-800 shadow-sm underline"
         >
           Save

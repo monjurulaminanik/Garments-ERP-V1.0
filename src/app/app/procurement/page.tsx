@@ -45,7 +45,7 @@ import {
   procurementProgressPct,
   useProcurementData,
 } from "@/hooks/useProcurementData";
-import { orders as seedOrders } from "@/lib/seed-data";
+import { useErpRecords } from "@/hooks/useErpRecords";
 import { exportToExcel, exportToPDF } from "@/lib/commercialExport";
 import { formatDate, formatNumber } from "@/lib/commercialFormat";
 import { bn } from "@/lib/bn";
@@ -109,6 +109,7 @@ function ProcurementContent() {
     tabParam === "trims" || tabParam === "po" || tabParam === "inhouse" || tabParam === "import" ? tabParam : "fabric";
 
   const { procurements, addProcurement, updateProcurement } = useProcurementData();
+  const orders = useErpRecords((state) => state.data.orders);
 
   const [search, setSearch] = useState("");
   const [buyerFilter, setBuyerFilter] = useState("all");
@@ -182,7 +183,7 @@ function ProcurementContent() {
 
   function handleAddSubmit(e: FormEvent) {
     e.preventDefault();
-    const order = seedOrders.find((o) => o.id === form.orderId);
+    const order = orders.find((o) => o.id === form.orderId);
     if (!order) return;
     addProcurement({
       type: form.type,
@@ -432,7 +433,7 @@ function ProcurementContent() {
               <Label required>{bn.procurement.selectOrder}</Label>
               <Select required value={form.orderId} onChange={(e) => setForm({ ...form, orderId: e.target.value })}>
                 <option value="">— {bn.procurement.selectOrder} —</option>
-                {seedOrders.map((o) => (
+                {orders.map((o) => (
                   <option key={o.id} value={o.id}>
                     {o.buyerName} — {o.poNumber} ({o.style})
                   </option>

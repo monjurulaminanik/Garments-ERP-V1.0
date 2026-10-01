@@ -62,8 +62,10 @@ interface ProductionState {
   refresh: () => Promise<void>;
 }
 
+let productionServerReady = false;
+
 function persistToServer(state: Omit<ProductionState, "addCuttingJob" | "updateCuttingJob" | "addSewingLine" | "updateSewingLine" | "addFinishingJob" | "updateFinishingJob" | "addPackingJob" | "updatePackingJob" | "refresh">) {
-  if (typeof window === "undefined") return;
+  if (!productionServerReady || typeof window === "undefined") return;
   fetch("/api/data?store=production", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -93,6 +95,7 @@ export const useProductionData = create<ProductionState>()(
             const json = await res.json();
             if (json?.success && json.data) {
               set({ ...json.data });
+              productionServerReady = true;
             }
           } catch (e) {}
         },

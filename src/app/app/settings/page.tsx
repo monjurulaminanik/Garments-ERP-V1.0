@@ -65,7 +65,9 @@ export default function SettingsPage() {
   const [profileForm, setProfileForm] = useState(() => ({
     companyName: settings.companyName,
     tagline: settings.tagline,
-    taglineBn: settings.taglineBn,
+    taglineBn: /[\u0980-\u09FF]/.test(settings.taglineBn)
+      ? "From order confirmation to shipment — everything in one ERP."
+      : settings.taglineBn,
     address: settings.address,
     phone: settings.phone,
     email: settings.email,
@@ -189,7 +191,7 @@ export default function SettingsPage() {
               <Input value={profileForm.tagline} onChange={(e) => setProfileForm({ ...profileForm, tagline: e.target.value })} />
             </div>
             <div>
-              <Label>Tagline (Bengali)</Label>
+              <Label>Secondary tagline</Label>
               <Input value={profileForm.taglineBn} onChange={(e) => setProfileForm({ ...profileForm, taglineBn: e.target.value })} />
             </div>
             <div className="sm:col-span-2">
@@ -249,7 +251,7 @@ export default function SettingsPage() {
                     </span>
                   )}
                   <p className="pr-6 text-sm font-semibold text-slate-800">{role.name}</p>
-                  <p className="text-xs text-slate-500">{role.nameBn}</p>
+                  <p className="text-xs text-slate-500">{role.name}</p>
                   <p className="mt-2 text-xs leading-relaxed text-slate-500">{role.description}</p>
                   <div className="mt-3 flex flex-wrap gap-1">
                     {role.focusModules.slice(0, 3).map((m) => (

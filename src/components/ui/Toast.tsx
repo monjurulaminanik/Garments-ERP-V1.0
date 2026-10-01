@@ -74,7 +74,7 @@ export function Toaster() {
   if (!mounted || typeof document === "undefined") return null;
 
   return createPortal(
-    <div className="pointer-events-none fixed inset-x-0 top-4 z-[100] flex flex-col items-center gap-2 px-4 sm:items-end sm:right-4 sm:left-auto">
+    <div className="pointer-events-none fixed inset-x-0 top-4 z-[200] flex flex-col items-center gap-2 px-4 sm:items-end sm:right-4 sm:left-auto">
       {items.map((item) => {
         const { icon: Icon, classes } = variantStyles[item.variant];
         return (

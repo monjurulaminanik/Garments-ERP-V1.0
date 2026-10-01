@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackButton } from "@/components/layout/BackButton";
 import {
   ShoppingCart,
   CalendarClock,
@@ -46,32 +47,32 @@ const FEATURES = [
   {
     icon: Gauge,
     title: "Real-time Factory Pulse",
-    desc: "Cutting থেকে Packing পর্যন্ত প্রতিটি লাইনের লাইভ প্রোডাকশন স্ট্যাটাস, এক স্ক্রিনে।",
+    desc: "Live production status for every line, from cutting to packing, on one screen.",
   },
   {
     icon: CalendarClock,
     title: "T&A Risk Alerts",
-    desc: "Delay হওয়ার আগেই ঝুঁকিপূর্ণ মাইলস্টোন চিহ্নিত করে — sample থেকে ex-factory পর্যন্ত।",
+    desc: "Flags risky milestones before they slip — from sample to ex-factory.",
   },
   {
     icon: ClipboardCheck,
     title: "Inline / Endline / Final QC",
-    desc: "Defect rate, AQL এবং rejection ট্র্যাকিং প্রতিটি buyer ও style অনুযায়ী।",
+    desc: "Defect rate, AQL and rejection tracking for every buyer and style.",
   },
   {
     icon: Wallet,
     title: "Costing & P/L Visibility",
-    desc: "প্রতিটি order-এর CM, cost breakdown এবং প্রকৃত profit/loss রিয়েল টাইমে।",
+    desc: "CM, cost breakdown and actual profit or loss for every order, in real time.",
   },
   {
     icon: ShieldCheck,
     title: "Role-based Access",
-    desc: "Owner, Merchandiser, Production, QC, Store ও Accounts — প্রত্যেকের জন্য আলাদা প্যানেল।",
+    desc: "A separate panel for Owner, Merchandiser, Production, QC, Store and Accounts.",
   },
   {
     icon: LineChart,
     title: "Executive Reporting",
-    desc: "PDF ও Excel এক্সপোর্টসহ buyer performance, line efficiency ও shipment analytics।",
+    desc: "Buyer performance, line efficiency and shipment analytics, with PDF and Excel export.",
   },
 ];
 
@@ -80,8 +81,9 @@ export default function LandingPage() {
     <div className="relative overflow-hidden bg-ink-950 text-white">
       {/* Top navigation */}
       <header className="relative z-30 border-b border-white/10">
-        <div className="container-erp flex h-16 items-center justify-between sm:h-20">
+        <div className="container-erp flex h-16 items-center justify-between gap-3 sm:h-20">
           <div className="flex items-center gap-2.5">
+            <BackButton />
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-500 text-sm font-bold shadow-glow sm:h-10 sm:w-10">
               DR
             </span>
@@ -127,7 +129,7 @@ export default function LandingPage() {
         <div className="container-erp relative z-10 flex flex-col items-center py-20 text-center sm:py-28 lg:py-32">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-medium text-teal-100 backdrop-blur-sm">
             <Factory className="h-3.5 w-3.5 text-accent-400" />
-            বাংলাদেশের গার্মেন্টস ফ্যাক্টরির জন্য একক ERP সমাধান
+            One ERP for a garment factory
           </div>
 
           <h1 className="font-display mt-8 max-w-4xl text-balance text-4xl font-bold leading-[1.08] tracking-tight sm:text-6xl lg:text-7xl">
@@ -138,7 +140,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="mt-6 max-w-2xl text-balance text-base text-teal-100/90 sm:text-lg">
-            Order বুকিং থেকে Shipment পর্যন্ত — আপনার ফ্যাক্টরির প্রতিটি ধাপ নিয়ন্ত্রণ করুন একটি প্ল্যাটফর্ম থেকে।
+            From order booking to shipment — control every step of the factory from one platform.
           </p>
           <p className="mt-2 max-w-2xl text-balance text-sm text-teal-200/70 sm:text-base">
             Full control over your factory&apos;s order-to-shipment lifecycle — Merchandising, T&amp;A, Production,
@@ -175,10 +177,10 @@ export default function LandingPage() {
               End-to-End Workflow
             </p>
             <h2 className="font-display mt-3 text-balance text-3xl font-bold sm:text-4xl">
-              Order থেকে Reports — একটানা, স্বচ্ছ প্রবাহ
+              From order to reports — one clear flow
             </h2>
             <p className="mt-3 text-sm text-teal-200/70 sm:text-base">
-              প্রতিটি ধাপ একে অপরের সাথে সংযুক্ত — কোথাও তথ্য হারায় না, দেরি লুকায় না।
+              Every step stays linked. Nothing is lost, and delays stay visible.
             </p>
           </div>
 
@@ -213,7 +215,7 @@ export default function LandingPage() {
               Platform Modules
             </p>
             <h2 className="font-display mt-3 text-balance text-3xl font-bold sm:text-4xl">
-              প্রতিটি বিভাগের জন্য উপযুক্ত টুল
+              The right tools for every department
             </h2>
           </div>
 
@@ -244,7 +246,7 @@ export default function LandingPage() {
             <div className="bg-hero-radial absolute inset-0" />
             <div className="relative z-10">
               <h2 className="font-display text-balance text-2xl font-bold sm:text-3xl">
-                আপনার ফ্যাক্টরির নিয়ন্ত্রণ আজই শুরু করুন
+                Start controlling the factory today
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-balance text-sm text-teal-100/80 sm:text-base">
                 Take command of your production floor — from the first PO to the final invoice.
@@ -273,7 +275,7 @@ export default function LandingPage() {
             <div>
               <p className="font-display text-sm font-bold">Dawat RMG SOFT</p>
               <p className="text-xs text-teal-200/60">
-                কারখানার নিয়ন্ত্রণ, এক প্ল্যাটফর্মে — Order to Shipment, Fully Controlled.
+                Factory control on one platform — order to shipment, fully controlled.
               </p>
             </div>
           </div>

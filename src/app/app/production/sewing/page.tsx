@@ -25,7 +25,7 @@ import {
 } from "@/components/commercial/ui";
 import { Calculator } from "lucide-react";
 import { SewingLine, useProductionData } from "@/hooks/useProductionData";
-import { orders as seedOrders } from "@/lib/seed-data";
+import { useErpRecords } from "@/hooks/useErpRecords";
 import { exportToExcel, exportToPDF } from "@/lib/commercialExport";
 import { formatNumber } from "@/lib/commercialFormat";
 import { bn } from "@/lib/bn";
@@ -56,6 +56,7 @@ const emptyForm: FormState = {
 
 export default function SewingPage() {
   const { sewingLines, addSewingLine, updateSewingLine } = useProductionData();
+  const orders = useErpRecords((state) => state.data.orders);
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -102,7 +103,7 @@ export default function SewingPage() {
 
   function handleAddSubmit(e: FormEvent) {
     e.preventDefault();
-    const order = seedOrders.find((o) => o.id === form.orderId);
+    const order = orders.find((o) => o.id === form.orderId);
     if (!order) return;
     addSewingLine({
       lineName: form.lineName,
@@ -195,7 +196,7 @@ export default function SewingPage() {
             }}
           >
             <Plus className="h-4 w-4" />
-            নতুন লাইন যোগ করুন
+            Add sewing line
           </Button>
         </div>
       </div>
@@ -346,7 +347,7 @@ export default function SewingPage() {
       )}
 
       {/* Add line modal */}
-      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="নতুন সেলাই লাইন" size="lg">
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="New sewing line" size="lg">
         <form onSubmit={handleAddSubmit} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
@@ -357,7 +358,7 @@ export default function SewingPage() {
               <Label required>{bn.procurement.selectOrder}</Label>
               <Select required value={form.orderId} onChange={(e) => setForm({ ...form, orderId: e.target.value })}>
                 <option value="">— {bn.procurement.selectOrder} —</option>
-                {seedOrders.map((o) => (
+                {orders.map((o) => (
                   <option key={o.id} value={o.id}>
                     {o.buyerName} — {o.poNumber} ({o.style})
                   </option>

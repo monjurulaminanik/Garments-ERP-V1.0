@@ -1,3 +1,4 @@
+import { repairErpData } from "./db/repair";
 import type {
   Buyer,
   Order,
@@ -866,7 +867,7 @@ export const pnl: Pnl[] = [
 export const settings: Settings = {
   companyName: "DAWAT GARMENTS LTD.",
   tagline: "From order confirmation to shipment — all in one ERP.",
-  taglineBn: "অর্ডার কনফার্মেশন থেকে শিপমেন্ট পর্যন্ত—সব এক ERP-তে।",
+  taglineBn: "From order confirmation to shipment — everything in one ERP.",
   address: "Ashulia, Savar, Dhaka-1341, Bangladesh",
   phone: "+880 1713-224488",
   email: "info@samedawatgarments.com",
@@ -876,13 +877,13 @@ export const settings: Settings = {
 };
 
 export const roles: Role[] = [
-  { id: "super_admin", name: "Super Admin", nameBn: "সুপার অ্যাডমিন", description: "Full ERP overview across all modules and operations", focusModules: ["all"], defaultRoute: "/dashboard" },
-  { id: "owner_director", name: "Owner / Director", nameBn: "মালিক / পরিচালক", description: "Executive overview, KPI, shipment and profit status", focusModules: ["dashboard", "shipment", "accounts"], defaultRoute: "/dashboard/executive" },
-  { id: "merchandiser", name: "Merchandiser", nameBn: "মার্চেন্ডাইজার", description: "Buyers, orders, T&A, samples and costing", focusModules: ["buyers", "orders", "ta-calendar", "samples", "costing"], defaultRoute: "/buyers" },
-  { id: "production_manager", name: "Production Manager", nameBn: "প্রোডাকশন ম্যানেজার", description: "Cutting, sewing, finishing and packing", focusModules: ["production"], defaultRoute: "/production/cutting" },
-  { id: "qc_manager", name: "QC Manager", nameBn: "কিউসি ম্যানেজার", description: "Inline QC, endline QC and final inspection", focusModules: ["quality-control"], defaultRoute: "/quality-control" },
-  { id: "store_manager", name: "Store Manager", nameBn: "স্টোর ম্যানেজার", description: "Fabric, trims, inventory and in-house status", focusModules: ["inventory", "procurement"], defaultRoute: "/inventory" },
-  { id: "accounts_manager", name: "Accounts Manager", nameBn: "অ্যাকাউন্টস ম্যানেজার", description: "Buyer ledger, supplier ledger and profit/loss", focusModules: ["accounts"], defaultRoute: "/accounts" },
+  { id: "super_admin", name: "Super Admin", nameBn: "Super Admin", description: "Full ERP overview across all modules and operations", focusModules: ["all"], defaultRoute: "/dashboard" },
+  { id: "owner_director", name: "Owner / Director", nameBn: "Owner / Director", description: "Executive overview, KPI, shipment and profit status", focusModules: ["dashboard", "shipment", "accounts"], defaultRoute: "/dashboard/executive" },
+  { id: "merchandiser", name: "Merchandiser", nameBn: "Merchandiser", description: "Buyers, orders, T&A, samples and costing", focusModules: ["buyers", "orders", "ta-calendar", "samples", "costing"], defaultRoute: "/buyers" },
+  { id: "production_manager", name: "Production Manager", nameBn: "Production Manager", description: "Cutting, sewing, finishing and packing", focusModules: ["production"], defaultRoute: "/production/cutting" },
+  { id: "qc_manager", name: "QC Manager", nameBn: "QC Manager", description: "Inline QC, endline QC and final inspection", focusModules: ["quality-control"], defaultRoute: "/quality-control" },
+  { id: "store_manager", name: "Store Manager", nameBn: "Store Manager", description: "Fabric, trims, inventory and in-house status", focusModules: ["inventory", "procurement"], defaultRoute: "/inventory" },
+  { id: "accounts_manager", name: "Accounts Manager", nameBn: "Accounts Manager", description: "Buyer ledger, supplier ledger and profit/loss", focusModules: ["accounts"], defaultRoute: "/accounts" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -996,7 +997,7 @@ const hrData = generateHrData();
 /* ------------------------------------------------------------------ */
 
 export function buildSeedData(): ErpData {
-  return {
+  return repairErpData({
     buyers,
     orders,
     taTasks,
@@ -1030,7 +1031,7 @@ export function buildSeedData(): ErpData {
     accessoriesBookings: [],
     piRegisters: [],
     accEstimations: [],
-  };
+  });
 }
 
 export const seedData: ErpData = buildSeedData();

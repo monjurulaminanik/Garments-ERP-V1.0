@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Bell } from "lucide-react";
+import { ChevronDown, Bell, ArrowLeft } from "lucide-react";
 import { useErpStore, useAppStore } from "@/lib/store";
 import { ROLES, PANEL_TO_SEED, getRoleById, getRoleHome, type RoleId } from "@/lib/roles";
 import { formatDateBn, cn } from "@/lib/utils";
@@ -38,12 +38,22 @@ export function AppTopbar({ onMenuClick }: AppTopbarProps) {
 
   return (
     <header className="sticky top-0 z-20 flex h-12 shrink-0 items-center justify-between gap-3 border-b border-[#E2E8EA] bg-white/95 px-4 backdrop-blur">
-      <div className="min-w-0">
+      <div className="flex min-w-0 items-center gap-3">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md border border-[#E2E8EA] bg-white px-2.5 text-[12px] font-semibold text-[#0F4C5C] hover:bg-[#F3F6F7]"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back
+        </button>
+        <div className="min-w-0">
         <p className="truncate text-[13px] font-semibold text-[#0F4C5C]">Dawat RMG SOFT</p>
         <p className="truncate text-[10px] text-[#6E8386]">
           {activeRole ? `${activeRole.title} Panel` : "ERP"}
           {now ? ` · ${formatDateBn(now, { withWeekday: true })}` : ""}
         </p>
+        </div>
       </div>
 
       <div className="flex items-center gap-2">
@@ -65,7 +75,7 @@ export function AppTopbar({ onMenuClick }: AppTopbarProps) {
             className="flex h-8 items-center gap-2 rounded-md border border-[#E2E8EA] bg-white px-2.5 text-[12px] text-[#1A2628] hover:bg-[#F3F6F7]"
           >
             <span className="hidden text-left sm:block">
-              <span className="block text-[9px] uppercase tracking-wide text-[#6E8386]">প্যানেল</span>
+              <span className="block text-[9px] uppercase tracking-wide text-[#6E8386]">Panel</span>
               <span className="block font-semibold leading-none">{activeRole?.title ?? "Select"}</span>
             </span>
             <span className="font-semibold sm:hidden">{activeRole?.title ?? "Role"}</span>
@@ -76,7 +86,7 @@ export function AppTopbar({ onMenuClick }: AppTopbarProps) {
             <div className="absolute right-0 z-40 mt-1.5 w-80 overflow-hidden rounded-lg border border-[#E2E8EA] bg-white shadow-lg">
               <div className="border-b border-[#E2E8EA] px-3 py-2">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-[#6E8386]">
-                  Switch role panel — রোল প্যানেল পরিবর্তন
+                  Switch role panel
                 </p>
               </div>
               <ul className="max-h-80 overflow-y-auto py-1">
@@ -96,7 +106,7 @@ export function AppTopbar({ onMenuClick }: AppTopbarProps) {
                         {r.id === role && <span className="text-[10px] text-[#0F4C5C]">●</span>}
                       </span>
                       <span className="text-[11px] text-[#6E8386]">
-                        {r.titleBn} — {r.description}
+                        {r.title} — {r.description}
                       </span>
                     </button>
                   </li>
